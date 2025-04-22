@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - TaskWave</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eefaff',
+              100: '#d7f2ff',
+              200: '#b8e8ff',
+              300: '#88d9ff',
+              400: '#53c0ff',
+              500: '#2a9eff',
+              600: '#137aff',
+              700: '#1466ff',
+              800: '#1852db',
+              900: '#1a45ad',
+              950: '#162b69',
+            },
+            secondary: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <style>
+    .wave-bg {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230099ff' fill-opacity='0.1' d='M0,224L48,208C96,192,192,160,288,154.7C384,149,480,171,576,181.3C672,192,768,192,864,170.7C960,149,1056,107,1152,101.3C1248,96,1344,128,1392,144L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: 100% 40%;
+    }
+  </style>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen wave-bg">
+  <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <a href="index.html" class="flex justify-center">
+        <div class="text-3xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></div>
+      </a>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Create your account
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Or
+        <a href="login.html" class="font-medium text-primary-600 hover:text-primary-500">
+          sign in to existing account
+        </a>
+      </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <form id="registerForm" class="space-y-6">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700">
+              Full name
+            </label>
+            <div class="mt-1">
+              <input id="registerName" name="name" type="text" autocomplete="name" required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="John Doe">
+            </div>
+          </div>
+
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
+            <div class="mt-1">
+              <input id="registerEmail" name="email" type="email" autocomplete="email" required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="you@example.com">
+            </div>
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <div class="mt-1">
+              <input id="registerPassword" name="password" type="password" autocomplete="new-password" required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="••••••••">
+            </div>
+          </div>
+
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+              Confirm password
+            </label>
+            <div class="mt-1">
+              <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                placeholder="••••••••">
+            </div>
+          </div>
+
+          <div class="flex items-center">
+            <input id="agree-terms" name="agree-terms" type="checkbox" required
+              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+            <label for="agree-terms" class="ml-2 block text-sm text-gray-900">
+              I agree to the 
+              <a href="#" class="text-primary-600 hover:text-primary-500">Terms of Service</a>
+              and
+              <a href="#" class="text-primary-600 hover:text-primary-500">Privacy Policy</a>
+            </label>
+          </div>
+
+          <div>
+            <button type="submit"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              Create account
+            </button>
+          </div>
+        </form>
+
+        <!-- Status Message -->
+        <div id="statusMessage" class="hidden mt-4 px-4 py-3 rounded text-center text-white"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Configuration -->
+  <script src="js/firebase-config.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check auth state
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in, redirect to dashboard
+          window.location.href = 'dashboard.html';
+        }
+      });
+
+      // Register Form
+      const registerForm = document.getElementById('registerForm');
+      const statusMessage = document.getElementById('statusMessage');
+
+      registerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('registerName').value;
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Validate form
+        if (!name || !email || !password || !confirmPassword) {
+          showStatus('Please fill in all fields', 'error');
+          return;
+        }
+        
+        if (password !== confirmPassword) {
+          showStatus('Passwords do not match', 'error');
+          return;
+        }
+        
+        if (password.length < 6) {
+          showStatus('Password should be at least 6 characters', 'error');
+          return;
+        }
+        
+        // Create account
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            
+            // Save user data
+            return firebase.database().ref('users/' + user.uid).set({
+              name: name,
+              email: email,
+              createdAt: firebase.database.ServerValue.TIMESTAMP
+            });
+          })
+          .then(() => {
+            showStatus('Account created successfully! Redirecting...', 'success');
+            setTimeout(() => {
+              window.location.href = 'dashboard.html';
+            }, 1500);
+          })
+          .catch((error) => {
+            showStatus(error.message, 'error');
+          });
+      });
+
+      // Show status message
+      function showStatus(message, type) {
+        statusMessage.textContent = message;
+        statusMessage.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
+        
+        if (type === 'success') {
+          statusMessage.classList.add('bg-green-500');
+        } else {
+          statusMessage.classList.add('bg-red-500');
+        }
+        
+        // Hide after 5 seconds
+        setTimeout(() => {
+          statusMessage.classList.add('hidden');
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+</html>

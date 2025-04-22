@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - TaskWave</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eefaff',
+              100: '#d7f2ff',
+              200: '#b8e8ff',
+              300: '#88d9ff',
+              400: '#53c0ff',
+              500: '#2a9eff',
+              600: '#137aff',
+              700: '#1466ff',
+              800: '#1852db',
+              900: '#1a45ad',
+              950: '#162b69',
+            },
+            secondary: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <style>
+    .wave-bg {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230099ff' fill-opacity='0.1' d='M0,224L48,208C96,192,192,160,288,154.7C384,149,480,171,576,181.3C672,192,768,192,864,170.7C960,149,1056,107,1152,101.3C1248,96,1344,128,1392,144L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+    
+    .profile-image-upload:hover .profile-image-overlay {
+      opacity: 1;
+    }
+    
+    .profile-image-overlay {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    
+    .shimmer {
+      background: linear-gradient(90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.2) 50%, 
+        rgba(255,255,255,0) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-80 z-50 flex items-center justify-center">
+    <div class="text-center">
+      <div class="inline-block animate-pulse">
+        <div class="text-4xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></div>
+      </div>
+      <p class="mt-4 text-gray-600">Loading your profile...</p>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <a href="dashboard.html" class="text-2xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></a>
+          </div>
+          <nav class="ml-6 flex space-x-8">
+            <a href="dashboard.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Dashboard
+            </a>
+            <a href="tasks.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Tasks
+            </a>
+            <a href="team.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Team
+            </a>
+          </nav>
+        </div>
+        <div class="flex items-center">
+          <div class="ml-4 flex items-center md:ml-6">
+            <!-- Notification Bell -->
+            <button class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative">
+              <span class="sr-only">View notifications</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span id="notificationBadge" class="hidden absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+            </button>
+
+            <!-- Profile dropdown -->
+            <div class="ml-3 relative group">
+              <div class="flex items-center gap-2">
+                <span id="userDisplayName" class="text-sm font-medium text-gray-700">Loading...</span>
+                <div class="flex rounded-full bg-gray-100 text-sm focus:outline-none">
+                  <span class="inline-block h-8 w-8 rounded-full overflow-hidden bg-gray-200">
+                    <svg class="h-full w-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </span>
+                </div>
+                <button id="logoutBtn" class="text-sm text-gray-500 hover:text-red-500 transition-colors">Logout</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Profile Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">My Profile</h1>
+        <p class="text-gray-600 mt-1">Manage your account settings and preferences</p>
+      </div>
+    </div>
+
+    <!-- Profile Tabs -->
+    <div class="bg-white rounded-lg shadow-sm mb-6">
+      <div class="border-b border-gray-200">
+        <nav class="flex -mb-px">
+          <button id="personalInfoTab" class="text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+            Personal Information
+          </button>
+          <button id="securityTab" class="text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+            Security
+          </button>
+          <button id="preferencesTab" class="text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+            Preferences
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Personal Information Content -->
+    <div id="personalInfoContent" class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Personal Information</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">Update your personal details and profile picture</p>
+      </div>
+      <div class="px-4 py-5 sm:p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Profile Picture -->
+          <div class="col-span-1 flex flex-col items-center">
+            <div class="relative profile-image-upload">
+              <div id="profileImageContainer" class="w-40 h-40 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                <svg id="defaultProfileImage" class="h-full w-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <img id="profileImage" class="h-full w-full object-cover hidden" src="/placeholder.svg" alt="Profile picture">
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center rounded-full bg-black bg-opacity-50 profile-image-overlay">
+                <label for="profileImageUpload" class="cursor-pointer text-white text-sm font-medium">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Change Photo
+                </label>
+                <input type="file" id="profileImageUpload" class="hidden" accept="image/*">
+              </div>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">Click on the image to upload a new profile picture</p>
+            <div id="uploadProgress" class="w-full mt-2 hidden">
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="uploadProgressBar" class="bg-gradient-to-r from-primary-500 to-secondary-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+              <p id="uploadStatus" class="mt-1 text-xs text-gray-500 text-center">Uploading: 0%</p>
+            </div>
+          </div>
+          
+          <!-- Personal Details Form -->
+          <div class="col-span-2">
+            <form id="personalInfoForm" class="space-y-6">
+              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                  <input type="text" id="fullName" name="fullName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                </div>
+                <div>
+                  <label for="displayName" class="block text-sm font-medium text-gray-700">Display Name</label>
+                  <input type="text" id="displayName" name="displayName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                </div>
+              </div>
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                <input type="email" id="email" name="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" disabled>
+                <p class="mt-1 text-xs text-gray-500">Email address cannot be changed</p>
+              </div>
+              
+              <div>
+                <label for="bio" class="block text-sm font-medium text-gray-700">Bio</label>
+                <textarea id="bio" name="bio" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Tell us a little about yourself"></textarea>
+              </div>
+              
+              <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                  <input type="text" id="location" name="location" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="City, Country">
+                </div>
+                <div>
+                  <label for="timezone" class="block text-sm font-medium text-gray-700">Timezone</label>
+                  <select id="timezone" name="timezone" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                    <option value="UTC-12:00">(UTC-12:00) International Date Line West</option>
+                    <option value="UTC-11:00">(UTC-11:00) Coordinated Universal Time-11</option>
+                    <option value="UTC-10:00">(UTC-10:00) Hawaii</option>
+                    <option value="UTC-09:00">(UTC-09:00) Alaska</option>
+                    <option value="UTC-08:00">(UTC-08:00) Pacific Time (US & Canada)</option>
+                    <option value="UTC-07:00">(UTC-07:00) Mountain Time (US & Canada)</option>
+                    <option value="UTC-06:00">(UTC-06:00) Central Time (US & Canada)</option>
+                    <option value="UTC-05:00">(UTC-05:00) Eastern Time (US & Canada)</option>
+                    <option value="UTC-04:00">(UTC-04:00) Atlantic Time (Canada)</option>
+                    <option value="UTC-03:00">(UTC-03:00) Brasilia</option>
+                    <option value="UTC-02:00">(UTC-02:00) Mid-Atlantic</option>
+                    <option value="UTC-01:00">(UTC-01:00) Azores</option>
+                    <option value="UTC+00:00">(UTC+00:00) London, Dublin, Lisbon</option>
+                    <option value="UTC+01:00">(UTC+01:00) Berlin, Paris, Rome, Madrid</option>
+                    <option value="UTC+02:00">(UTC+02:00) Athens, Istanbul, Cairo</option>
+                    <option value="UTC+03:00">(UTC+03:00) Moscow, Baghdad, Riyadh</option>
+                    <option value="UTC+04:00">(UTC+04:00) Dubai, Abu Dhabi</option>
+                    <option value="UTC+05:00">(UTC+05:00) Islamabad, Karachi</option>
+                    <option value="UTC+05:30">(UTC+05:30) New Delhi, Mumbai</option>
+                    <option value="UTC+06:00">(UTC+06:00) Dhaka, Almaty</option>
+                    <option value="UTC+07:00">(UTC+07:00) Bangkok, Jakarta</option>
+                    <option value="UTC+08:00">(UTC+08:00) Beijing, Singapore, Hong Kong</option>
+                    <option value="UTC+09:00">(UTC+09:00) Tokyo, Seoul</option>
+                    <option value="UTC+10:00">(UTC+10:00) Sydney, Melbourne</option>
+                    <option value="UTC+11:00">(UTC+11:00) Noumea, Solomon Islands</option>
+                    <option value="UTC+12:00">(UTC+12:00) Auckland, Fiji</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
+                <input type="url" id="website" name="website" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="https://example.com">
+              </div>
+              
+              <div class="flex justify-end">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Content -->
+    <div id="securityContent" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Security</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage your password and account security</p>
+      </div>
+      <div class="px-4 py-5 sm:p-6">
+        <form id="changePasswordForm" class="space-y-6">
+          <div>
+            <label for="currentPassword" class="block text-sm font-medium text-gray-700">Current Password</label>
+            <input type="password" id="currentPassword" name="currentPassword" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+          </div>
+          
+          <div>
+            <label for="newPassword" class="block text-sm font-medium text-gray-700">New Password</label>
+            <input type="password" id="newPassword" name="newPassword" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+          </div>
+          
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              Update Password
+            </button>
+          </div>
+        </form>
+        
+        <div class="mt-10 pt-10 border-t border-gray-200">
+          <h4 class="text-lg font-medium text-gray-900">Account Security</h4>
+          
+          <div class="mt-4 space-y-4">
+            <div class="flex items-start">
+              <div class="flex items-center h-5">
+                <input id="emailNotifications" name="emailNotifications" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+              </div>
+              <div class="ml-3 text-sm">
+                <label for="emailNotifications" class="font-medium text-gray-700">Email notifications for security events</label>
+                <p class="text-gray-500">Receive email notifications for important security events like password changes and login attempts</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="flex items-center h-5">
+                <input id="sessionTimeout" name="sessionTimeout" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+              </div>
+              <div class="ml-3 text-sm">
+                <label for="sessionTimeout" class="font-medium text-gray-700">Auto logout after inactivity</label>
+                <p class="text-gray-500">Automatically log out after 30 minutes of inactivity for better security</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-6">
+            <button type="button" id="saveSecuritySettings" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              Save Security Settings
+            </button>
+          </div>
+        </div>
+        
+        <div class="mt-10 pt-10 border-t border-gray-200">
+          <h4 class="text-lg font-medium text-red-600">Danger Zone</h4>
+          <p class="mt-1 text-sm text-gray-500">Permanent actions that cannot be undone</p>
+          
+          <div class="mt-4">
+            <button type="button" id="deleteAccountBtn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences Content -->
+    <div id="preferencesContent" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Preferences</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">Customize your TaskWave experience</p>
+      </div>
+      <div class="px-4 py-5 sm:p-6">
+        <div class="space-y-6">
+          <div>
+            <h4 class="text-lg font-medium text-gray-900">Notifications</h4>
+            <p class="mt-1 text-sm text-gray-500">Manage how and when you receive notifications</p>
+            
+            <div class="mt-4 space-y-4">
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="taskReminders" name="taskReminders" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="taskReminders" class="font-medium text-gray-700">Task reminders</label>
+                  <p class="text-gray-500">Receive notifications for upcoming task deadlines</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="taskAssignments" name="taskAssignments" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="taskAssignments" class="font-medium text-gray-700">Task assignments</label>
+                  <p class="text-gray-500">Receive notifications when tasks are assigned to you</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="taskUpdates" name="taskUpdates" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="taskUpdates" class="font-medium text-gray-700">Task updates</label>
+                  <p class="text-gray-500">Receive notifications when tasks you're involved with are updated</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="teamUpdates" name="teamUpdates" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="teamUpdates" class="font-medium text-gray-700">Team updates</label>
+                  <p class="text-gray-500">Receive notifications about team activities and announcements</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="pt-6 border-t border-gray-200">
+            <h4 class="text-lg font-medium text-gray-900">Display Settings</h4>
+            <p class="mt-1 text-sm text-gray-500">Customize how TaskWave looks and feels</p>
+            
+            <div class="mt-4 space-y-4">
+              <div>
+                <label for="defaultView" class="block text-sm font-medium text-gray-700">Default Task View</label>
+                <select id="defaultView" name="defaultView" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                  <option value="list">List View</option>
+                  <option value="board">Board View</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="defaultSort" class="block text-sm font-medium text-gray-700">Default Sort Order</label>
+                <select id="defaultSort" name="defaultSort" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                  <option value="dueDate">Due Date</option>
+                  <option value="priority">Priority</option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="title">Title</option>
+                </select>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="compactMode" name="compactMode" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="compactMode" class="font-medium text-gray-700">Compact mode</label>
+                  <p class="text-gray-500">Display more tasks in less space with a compact layout</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="pt-6 border-t border-gray-200">
+            <h4 class="text-lg font-medium text-gray-900">Email Preferences</h4>
+            <p class="mt-1 text-sm text-gray-500">Manage email communication preferences</p>
+            
+            <div class="mt-4 space-y-4">
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="dailyDigest" name="dailyDigest" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="dailyDigest" class="font-medium text-gray-700">Daily digest</label>
+                  <p class="text-gray-500">Receive a daily summary of your tasks and activities</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="weeklyReport" name="weeklyReport" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="weeklyReport" class="font-medium text-gray-700">Weekly report</label>
+                  <p class="text-gray-500">Receive a weekly summary of your productivity and completed tasks</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="marketingEmails" name="marketingEmails" type="checkbox" class="focus:ring-primary-500 h-4 w-4 text-primary-600 border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="marketingEmails" class="font-medium text-gray-700">Marketing emails</label>
+                  <p class="text-gray-500">Receive updates about new features, tips, and best practices</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="button" id="savePreferencesBtn" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+              Save Preferences
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
+    <div id="toastIcon" class="mr-2"></div>
+    <div id="toastMessage"></div>
+    <button id="toastClose" class="ml-4 text-gray-400 hover:text-gray-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Delete Account Confirmation Modal -->
+  <div id="deleteAccountModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+      <div class="bg-red-600 px-4 py-3 text-white flex justify-between items-center">
+        <h3 class="text-lg font-medium">Delete Account</h3>
+        <button id="closeDeleteModal" class="text-white hover:text-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h4 class="text-lg font-medium text-gray-900 mb-2">Are you sure you want to delete your account?</h4>
+          <p class="text-sm text-gray-500">This action cannot be undone. All of your data will be permanently deleted, including your profile, tasks, and team connections.</p>
+        </div>
+        <div class="mb-4">
+          <label for="deleteConfirmation" class="block text-sm font-medium text-gray-700 mb-1">Type "DELETE" to confirm</label>
+          <input type="text" id="deleteConfirmation" name="deleteConfirmation" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="DELETE">
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button id="cancelDeleteBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+            Cancel
+          </button>
+          <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" disabled>
+            Delete Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Configuration -->
+  <script src="js/firebase-config.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const auth = firebase.auth();
+      const database = firebase.database();
+      const storage = firebase.storage();
+      
+      // Elements
+      const userDisplayName = document.getElementById('userDisplayName');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const personalInfoTab = document.getElementById('personalInfoTab');
+      const securityTab = document.getElementById('securityTab');
+      const preferencesTab = document.getElementById('preferencesTab');
+      const personalInfoContent = document.getElementById('personalInfoContent');
+      const securityContent = document.getElementById('securityContent');
+      const preferencesContent = document.getElementById('preferencesContent');
+      const personalInfoForm = document.getElementById('personalInfoForm');
+      const fullName = document.getElementById('fullName');
+      const displayName = document.getElementById('displayName');
+      const email = document.getElementById('email');
+      const bio = document.getElementById('bio');
+      const location = document.getElementById('location');
+      const timezone = document.getElementById('timezone');
+      const website = document.getElementById('website');
+      const profileImageUpload = document.getElementById('profileImageUpload');
+      const profileImage = document.getElementById('profileImage');
+      const defaultProfileImage = document.getElementById('defaultProfileImage');
+      const uploadProgress = document.getElementById('uploadProgress');
+      const uploadProgressBar = document.getElementById('uploadProgressBar');
+      const uploadStatus = document.getElementById('uploadStatus');
+      const changePasswordForm = document.getElementById('changePasswordForm');
+      const currentPassword = document.getElementById('currentPassword');
+      const newPassword = document.getElementById('newPassword');
+      const confirmPassword = document.getElementById('confirmPassword');
+      const emailNotifications = document.getElementById('emailNotifications');
+      const sessionTimeout = document.getElementById('sessionTimeout');
+      const saveSecuritySettings = document.getElementById('saveSecuritySettings');
+      const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+      const deleteAccountModal = document.getElementById('deleteAccountModal');
+      const closeDeleteModal = document.getElementById('closeDeleteModal');
+      const deleteConfirmation = document.getElementById('deleteConfirmation');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+      const taskReminders = document.getElementById('taskReminders');
+      const taskAssignments = document.getElementById('taskAssignments');
+      const taskUpdates = document.getElementById('taskUpdates');
+      const teamUpdates = document.getElementById('teamUpdates');
+      const defaultView = document.getElementById('defaultView');
+      const defaultSort = document.getElementById('defaultSort');
+      const compactMode = document.getElementById('compactMode');
+      const dailyDigest = document.getElementById('dailyDigest');
+      const weeklyReport = document.getElementById('weeklyReport');
+      const marketingEmails = document.getElementById('marketingEmails');
+      const savePreferencesBtn = document.getElementById('savePreferencesBtn');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastClose = document.getElementById('toastClose');
+      
+      // Auth state change listener
+      auth.onAuthStateChanged(function(user) {
+        if (!user) {
+          // Redirect to login if not signed in
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        // Load user data
+        loadUserData(user.uid);
+        
+        // Load user preferences
+        loadUserPreferences(user.uid);
+        
+        // Hide loading overlay
+        setTimeout(() => {
+          loadingOverlay.classList.add('opacity-0');
+          setTimeout(() => {
+            loadingOverlay.classList.add('hidden');
+          }, 300);
+        }, 1000);
+      });
+      
+      // Logout
+      logoutBtn.addEventListener('click', function() {
+        auth.signOut().then(() => {
+          window.location.href = 'login.html';
+        }).catch(error => {
+          console.error('Error signing out:', error);
+          showToast('Error signing out: ' + error.message, 'error');
+        });
+      });
+      
+      // Tab switching
+      personalInfoTab.addEventListener('click', function() {
+        setActiveTab('personalInfo');
+      });
+      
+      securityTab.addEventListener('click', function() {
+        setActiveTab('security');
+      });
+      
+      preferencesTab.addEventListener('click', function() {
+        setActiveTab('preferences');
+      });
+      
+      // Set active tab
+      function setActiveTab(tab) {
+        // Reset all tabs
+        personalInfoTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+        securityTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+        preferencesTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+        
+        personalInfoContent.classList.add('hidden');
+        securityContent.classList.add('hidden');
+        preferencesContent.classList.add('hidden');
+        
+        // Set active tab
+        if (tab === 'personalInfo') {
+          personalInfoTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+          personalInfoContent.classList.remove('hidden');
+        } else if (tab === 'security') {
+          securityTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+          securityContent.classList.remove('hidden');
+        } else if (tab === 'preferences') {
+          preferencesTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+          preferencesContent.classList.remove('hidden');
+        }
+      }
+      
+      // Load user data
+      function loadUserData(userId) {
+        database.ref('users/' + userId).once('value')
+          .then(snapshot => {
+            const userData = snapshot.val();
+            if (userData) {
+              // Update header display name
+              userDisplayName.textContent = userData.name || 'User';
+              
+              // Update form fields
+              fullName.value = userData.name || '';
+              displayName.value = userData.displayName || userData.name || '';
+              email.value = userData.email || '';
+              bio.value = userData.bio || '';
+              location.value = userData.location || '';
+              timezone.value = userData.timezone || 'UTC+00:00';
+              website.value = userData.website || '';
+              
+              // Load profile image if exists
+              if (userData.profileImageUrl) {
+                profileImage.src = userData.profileImageUrl;
+                profileImage.classList.remove('hidden');
+                defaultProfileImage.classList.add('hidden');
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error loading user data:', error);
+            showToast('Error loading user data', 'error');
+          });
+      }
+      
+      // Load user preferences
+      function loadUserPreferences(userId) {
+        database.ref('userPreferences/' + userId).once('value')
+          .then(snapshot => {
+            const preferences = snapshot.val() || {};
+            
+            // Security settings
+            emailNotifications.checked = preferences.emailNotifications || false;
+            sessionTimeout.checked = preferences.sessionTimeout || false;
+            
+            // Notification preferences
+            taskReminders.checked = preferences.taskReminders || false;
+            taskAssignments.checked = preferences.taskAssignments || false;
+            taskUpdates.checked = preferences.taskUpdates || false;
+            teamUpdates.checked = preferences.teamUpdates || false;
+            
+            // Display settings
+            defaultView.value = preferences.defaultView || 'list';
+            defaultSort.value = preferences.defaultSort || 'dueDate';
+            compactMode.checked = preferences.compactMode || false;
+            
+            // Email preferences
+            dailyDigest.checked = preferences.dailyDigest || false;
+            weeklyReport.checked = preferences.weeklyReport || false;
+            marketingEmails.checked = preferences.marketingEmails || false;
+          })
+          .catch(error => {
+            console.error('Error loading user preferences:', error);
+            showToast('Error loading user preferences', 'error');
+          });
+      }
+      
+      // Personal info form submit
+      personalInfoForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const userData = {
+          name: fullName.value.trim(),
+          displayName: displayName.value.trim(),
+          bio: bio.value.trim(),
+          location: location.value.trim(),
+          timezone: timezone.value,
+          website: website.value.trim(),
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        database.ref('users/' + user.uid).update(userData)
+          .then(() => {
+            showToast('Profile updated successfully', 'success');
+            
+            // Update header display name
+            userDisplayName.textContent = userData.name;
+          })
+          .catch(error => {
+            console.error('Error updating profile:', error);
+            showToast('Error updating profile: ' + error.message, 'error');
+          });
+      });
+      
+      // Profile image upload
+      profileImageUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        // Check file type
+        if (!file.type.match('image.*')) {
+          showToast('Please select an image file', 'error');
+          return;
+        }
+        
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Image size should be less than 5MB', 'error');
+          return;
+        }
+        
+        // Show progress bar
+        uploadProgress.classList.remove('hidden');
+        
+        // Create storage reference
+        const storageRef = storage.ref();
+        const profileImageRef = storageRef.child('profileImages/' + user.uid + '/' + Date.now() + '_' + file.name);
+        
+        // Upload file
+        const uploadTask = profileImageRef.put(file);
+        
+        // Monitor upload progress
+        uploadTask.on('state_changed', 
+          (snapshot) => {
+            // Progress
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            uploadProgressBar.style.width = progress + '%';
+            uploadStatus.textContent = 'Uploading: ' + Math.round(progress) + '%';
+          }, 
+          (error) => {
+            // Error
+            console.error('Error uploading image:', error);
+            showToast('Error uploading image: ' + error.message, 'error');
+            uploadProgress.classList.add('hidden');
+          }, 
+          () => {
+            // Complete
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+              // Update profile image
+              profileImage.src = downloadURL;
+              profileImage.classList.remove('hidden');
+              defaultProfileImage.classList.add('hidden');
+              
+              // Update user data
+              database.ref('users/' + user.uid).update({
+                profileImageUrl: downloadURL,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+              }).then(() => {
+                showToast('Profile image updated successfully', 'success');
+                uploadProgress.classList.add('hidden');
+              }).catch(error => {
+                console.error('Error updating profile image:', error);
+                showToast('Error updating profile image: ' + error.message, 'error');
+                uploadProgress.classList.add('hidden');
+              });
+            });
+          }
+        );
+      });
+      
+      // Change password form submit
+      changePasswordForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const currentPwd = currentPassword.value;
+        const newPwd = newPassword.value;
+        const confirmPwd = confirmPassword.value;
+        
+        if (!currentPwd || !newPwd || !confirmPwd) {
+          showToast('Please fill in all fields', 'error');
+          return;
+        }
+        
+        if (newPwd !== confirmPwd) {
+          showToast('New passwords do not match', 'error');
+          return;
+        }
+        
+        if (newPwd.length < 6) {
+          showToast('Password should be at least 6 characters', 'error');
+          return;
+        }
+        
+        // Reauthenticate user
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, currentPwd);
+        
+        user.reauthenticateWithCredential(credential)
+          .then(() => {
+            // Change password
+            return user.updatePassword(newPwd);
+          })
+          .then(() => {
+            showToast('Password updated successfully', 'success');
+            changePasswordForm.reset();
+          })
+          .catch(error => {
+            console.error('Error updating password:', error);
+            
+            if (error.code === 'auth/wrong-password') {
+              showToast('Current password is incorrect', 'error');
+            } else {
+              showToast('Error updating password: ' + error.message, 'error');
+            }
+          });
+      });
+      
+      // Save security settings
+      saveSecuritySettings.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const securitySettings = {
+          emailNotifications: emailNotifications.checked,
+          sessionTimeout: sessionTimeout.checked,
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        database.ref('userPreferences/' + user.uid).update(securitySettings)
+          .then(() => {
+            showToast('Security settings saved successfully', 'success');
+          })
+          .catch(error => {
+            console.error('Error saving security settings:', error);
+            showToast('Error saving security settings: ' + error.message, 'error');
+          });
+      });
+      
+      // Save preferences
+      savePreferencesBtn.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const preferences = {
+          // Notification preferences
+          taskReminders: taskReminders.checked,
+          taskAssignments: taskAssignments.checked,
+          taskUpdates: taskUpdates.checked,
+          teamUpdates: teamUpdates.checked,
+          
+          // Display settings
+          defaultView: defaultView.value,
+          defaultSort: defaultSort.value,
+          compactMode: compactMode.checked,
+          
+          // Email preferences
+          dailyDigest: dailyDigest.checked,
+          weeklyReport: weeklyReport.checked,
+          marketingEmails: marketingEmails.checked,
+          
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        database.ref('userPreferences/' + user.uid).update(preferences)
+          .then(() => {
+            showToast('Preferences saved successfully', 'success');
+          })
+          .catch(error => {
+            console.error('Error saving preferences:', error);
+            showToast('Error saving preferences: ' + error.message, 'error');
+          });
+      });
+      
+      // Delete account button
+      deleteAccountBtn.addEventListener('click', function() {
+        deleteAccountModal.classList.remove('hidden');
+      });
+      
+      // Close delete account modal
+      closeDeleteModal.addEventListener('click', function() {
+        deleteAccountModal.classList.add('hidden');
+        deleteConfirmation.value = '';
+        confirmDeleteBtn.disabled = true;
+      });
+      
+      // Cancel delete account
+      cancelDeleteBtn.addEventListener('click', function() {
+        deleteAccountModal.classList.add('hidden');
+        deleteConfirmation.value = '';
+        confirmDeleteBtn.disabled = true;
+      });
+      
+      // Delete confirmation input
+      deleteConfirmation.addEventListener('input', function() {
+        confirmDeleteBtn.disabled = this.value !== 'DELETE';
+      });
+      
+      // Confirm delete account
+      confirmDeleteBtn.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        // Delete user data
+        database.ref('users/' + user.uid).remove()
+          .then(() => {
+            // Delete user preferences
+            return database.ref('userPreferences/' + user.uid).remove();
+          })
+          .then(() => {
+            // Delete user tasks
+            return database.ref('tasks/' + user.uid).remove();
+          })
+          .then(() => {
+            // Delete user account
+            return user.delete();
+          })
+          .then(() => {
+            // Redirect to login page
+            window.location.href = 'login.html';
+          })
+          .catch(error => {
+            console.error('Error deleting account:', error);
+            
+            if (error.code === 'auth/requires-recent-login') {
+              showToast('Please log out and log in again to delete your account', 'error');
+            } else {
+              showToast('Error deleting account: ' + error.message, 'error');
+            }
+            
+            deleteAccountModal.classList.add('hidden');
+          });
+      });
+      
+      // Click outside to close delete account modal
+      deleteAccountModal.addEventListener('click', function(e) {
+        if (e.target === deleteAccountModal) {
+          deleteAccountModal.classList.add('hidden');
+          deleteConfirmation.value = '';
+          confirmDeleteBtn.disabled = true;
+        }
+      });
+      
+      // Show toast notification
+      function showToast(message, type = 'info') {
+        toastMessage.textContent = message;
+        
+        toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-blue-500');
+        
+        if (type === 'success') {
+          toast.classList.add('bg-green-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          `;
+        } else if (type === 'error') {
+          toast.classList.add('bg-red-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          `;
+        } else {
+          toast.classList.add('bg-blue-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+          `;
+        }
+        
+        toast.classList.add('text-white');
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+          toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+      }
+      
+      // Close toast
+      toastClose.addEventListener('click', function() {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      });
+    });
+  </script>
+</body>
+</html>

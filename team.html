@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team - TaskWave</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eefaff',
+              100: '#d7f2ff',
+              200: '#b8e8ff',
+              300: '#88d9ff',
+              400: '#53c0ff',
+              500: '#2a9eff',
+              600: '#137aff',
+              700: '#1466ff',
+              800: '#1852db',
+              900: '#1a45ad',
+              950: '#162b69',
+            },
+            secondary: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <style>
+    .shimmer {
+      background: linear-gradient(90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.2) 50%, 
+        rgba(255,255,255,0) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    .task-item:hover .task-actions {
+      opacity: 1;
+    }
+    
+    .task-actions {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+  </style>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-80 z-50 flex items-center justify-center">
+    <div class="text-center">
+      <div class="inline-block animate-pulse">
+        <div class="text-4xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></div>
+      </div>
+      <p class="mt-4 text-gray-600">Loading team data...</p>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <a href="dashboard.html" class="text-2xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></a>
+          </div>
+          <nav class="ml-6 flex space-x-8">
+            <a href="dashboard.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Dashboard
+            </a>
+            <a href="tasks.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Tasks
+            </a>
+            <a href="team.html" class="border-primary-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Team
+            </a>
+          </nav>
+        </div>
+        <div class="flex items-center">
+          <div class="ml-4 flex items-center md:ml-6">
+            <!-- Notification Bell -->
+            <button class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative">
+              <span class="sr-only">View notifications</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span id="notificationBadge" class="hidden absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+            </button>
+
+            <!-- Profile dropdown -->
+            <div class="ml-3 relative group">
+              <div class="flex items-center gap-2">
+                <span id="userDisplayName" class="text-sm font-medium text-gray-700">Loading...</span>
+                <div class="flex rounded-full bg-gray-100 text-sm focus:outline-none">
+                  <span class="inline-block h-8 w-8 rounded-full overflow-hidden bg-gray-200">
+                    <svg class="h-full w-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </span>
+                </div>
+                <button id="logoutBtn" class="text-sm text-gray-500 hover:text-red-500 transition-colors">Logout</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Team Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Team Collaboration</h1>
+        <p class="text-gray-600 mt-1">Manage shared tasks and team members</p>
+      </div>
+      <div class="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
+        <button id="inviteTeamMemberBtn" class="bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+          Invite Team Member
+        </button>
+      </div>
+    </div>
+
+    <!-- Team Tabs -->
+    <div class="bg-white rounded-lg shadow-sm mb-6">
+      <div class="border-b border-gray-200">
+        <nav class="flex -mb-px">
+          <button id="sharedWithMeTab" class="text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+            Shared With Me
+          </button>
+          <button id="sharedByMeTab" class="text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+            Shared By Me
+          </button>
+          <button id="teamMembersTab" class="text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+            Team Members
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Shared With Me Content -->
+    <div id="sharedWithMeContent" class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6 flex justify-between items-center">
+        <div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Tasks Shared With Me</h3>
+          <p class="mt-1 max-w-2xl text-sm text-gray-500">Tasks that others have shared with you</p>
+        </div>
+        <div>
+          <select id="sharedWithMeFilter" class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <option value="all">All Tasks</option>
+            <option value="pending">Pending</option>
+            <option value="accepted">Accepted</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shared On</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sharedWithMeList" class="bg-white divide-y divide-gray-200">
+            <!-- Will be populated dynamically -->
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Loading shared tasks...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="emptySharedWithMe" class="hidden py-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No shared tasks</h3>
+        <p class="mt-1 text-sm text-gray-500">No one has shared any tasks with you yet.</p>
+      </div>
+    </div>
+
+    <!-- Shared By Me Content -->
+    <div id="sharedByMeContent" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6 flex justify-between items-center">
+        <div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Tasks Shared By Me</h3>
+          <p class="mt-1 max-w-2xl text-sm text-gray-500">Tasks that you have shared with others</p>
+        </div>
+        <div>
+          <select id="sharedByMeFilter" class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <option value="all">All Tasks</option>
+            <option value="pending">Pending</option>
+            <option value="accepted">Accepted</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shared With</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shared On</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sharedByMeList" class="bg-white divide-y divide-gray-200">
+            <!-- Will be populated dynamically -->
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Loading shared tasks...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="emptySharedByMe" class="hidden py-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No shared tasks</h3>
+        <p class="mt-1 text-sm text-gray-500">You haven't shared any tasks with others yet.</p>
+        <div class="mt-6">
+          <button id="emptyShareTaskBtn" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:opacity-90 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            Share a Task
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Members Content -->
+    <div id="teamMembersContent" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Team Members</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">People you collaborate with</p>
+      </div>
+      <ul id="teamMembersList" class="divide-y divide-gray-200">
+        <!-- Will be populated dynamically -->
+        <li class="px-6 py-4 text-center text-sm text-gray-500">Loading team members...</li>
+      </ul>
+      <div id="emptyTeamMembers" class="hidden py-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No team members</h3>
+        <p class="mt-1 text-sm text-gray-500">You haven't added any team members yet.</p>
+        <div class="mt-6">
+          <button id="emptyInviteBtn" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:opacity-90 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            Invite Team Member
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
+    <div id="toastIcon" class="mr-2"></div>
+    <div id="toastMessage"></div>
+    <button id="toastClose" class="ml-4 text-gray-400 hover:text-gray-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Invite Team Member Modal -->
+  <div id="inviteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+      <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-4 py-3 text-white flex justify-between items-center">
+        <h3 class="text-lg font-medium">Invite Team Member</h3>
+        <button id="closeInviteModal" class="text-white hover:text-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="inviteForm" class="p-6 space-y-4">
+        <div>
+          <label for="inviteEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+          <input type="email" id="inviteEmail" name="inviteEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter email address" required>
+        </div>
+        <div>
+          <label for="inviteMessage" class="block text-sm font-medium text-gray-700 mb-1">Message (optional)</label>
+          <textarea id="inviteMessage" name="inviteMessage" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Add a personal message"></textarea>
+        </div>
+        <div class="pt-4">
+          <button type="submit" class="w-full px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Send Invitation
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Task Details Modal -->
+  <div id="taskDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+      <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-4 py-3 text-white flex justify-between items-center">
+        <h3 class="text-lg font-medium">Task Details</h3>
+        <button id="closeTaskDetailsModal" class="text-white hover:text-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="mb-6">
+          <h4 id="taskDetailsTitle" class="text-lg font-medium text-gray-900 mb-2"></h4>
+          <p id="taskDetailsDescription" class="text-gray-600 mb-4"></p>
+          <div class="flex flex-wrap gap-2 mb-4">
+            <div class="flex items-center text-sm text-gray-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+              <span id="taskDetailsPriority"></span>
+            </div>
+            <div class="flex items-center text-sm text-gray-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span id="taskDetailsDueDate"></span>
+            </div>
+            <div class="flex items-center text-sm text-gray-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span id="taskDetailsSharedOn"></span>
+            </div>
+          </div>
+          <div id="taskDetailsMessage" class="bg-gray-50 p-3 rounded-md text-sm text-gray-600 mb-4 hidden">
+            <div class="font-medium mb-1">Message:</div>
+            <p id="taskDetailsMessageText"></p>
+          </div>
+          <div class="flex items-center">
+            <div class="flex-shrink-0 mr-3">
+              <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center" id="taskDetailsUserInitial"></div>
+            </div>
+            <div>
+              <div id="taskDetailsUserName" class="text-sm font-medium"></div>
+              <div id="taskDetailsUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button id="rejectTaskBtn" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+            Reject
+          </button>
+          <button id="acceptTaskBtn" class="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-md hover:opacity-90 transition-opacity">
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Configuration -->
+  <script src="js/firebase-config.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const auth = firebase.auth();
+      const database = firebase.database();
+      
+      // Elements
+      const userDisplayName = document.getElementById('userDisplayName');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const sharedWithMeTab = document.getElementById('sharedWithMeTab');
+      const sharedByMeTab = document.getElementById('sharedByMeTab');
+      const teamMembersTab = document.getElementById('teamMembersTab');
+      const sharedWithMeContent = document.getElementById('sharedWithMeContent');
+      const sharedByMeContent = document.getElementById('sharedByMeContent');
+      const teamMembersContent = document.getElementById('teamMembersContent');
+      const sharedWithMeList = document.getElementById('sharedWithMeList');
+      const sharedByMeList = document.getElementById('sharedByMeList');
+      const teamMembersList = document.getElementById('teamMembersList');
+      const emptySharedWithMe = document.getElementById('emptySharedWithMe');
+      const emptySharedByMe = document.getElementById('emptySharedByMe');
+      const emptyTeamMembers = document.getElementById('emptyTeamMembers');
+      const inviteTeamMemberBtn = document.getElementById('inviteTeamMemberBtn');
+      const emptyInviteBtn = document.getElementById('emptyInviteBtn');
+      const emptyShareTaskBtn = document.getElementById('emptyShareTaskBtn');
+      const inviteModal = document.getElementById('inviteModal');
+      const closeInviteModal = document.getElementById('closeInviteModal');
+      const inviteForm = document.getElementById('inviteForm');
+      const inviteEmail = document.getElementById('inviteEmail');
+      const inviteMessage = document.getElementById('inviteMessage');
+      const taskDetailsModal = document.getElementById('taskDetailsModal');
+      const closeTaskDetailsModal = document.getElementById('closeTaskDetailsModal');
+      const taskDetailsTitle = document.getElementById('taskDetailsTitle');
+      const taskDetailsDescription = document.getElementById('taskDetailsDescription');
+      const taskDetailsPriority = document.getElementById('taskDetailsPriority');
+      const taskDetailsDueDate = document.getElementById('taskDetailsDueDate');
+      const taskDetailsSharedOn = document.getElementById('taskDetailsSharedOn');
+      const taskDetailsMessage = document.getElementById('taskDetailsMessage');
+      const taskDetailsMessageText = document.getElementById('taskDetailsMessageText');
+      const taskDetailsUserInitial = document.getElementById('taskDetailsUserInitial');
+      const taskDetailsUserName = document.getElementById('taskDetailsUserName');
+      const taskDetailsUserEmail = document.getElementById('taskDetailsUserEmail');
+      const acceptTaskBtn = document.getElementById('acceptTaskBtn');
+      const rejectTaskBtn = document.getElementById('rejectTaskBtn');
+      const sharedWithMeFilter = document.getElementById('sharedWithMeFilter');
+      const sharedByMeFilter = document.getElementById('sharedByMeFilter');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastClose = document.getElementById('toastClose');
+      
+      // Global variables
+      let currentTaskId = null;
+      let currentTaskData = null;
+      
+      // Auth state change listener
+      auth.onAuthStateChanged(function(user) {
+        if (!user) {
+          // Redirect to login if not signed in
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        // Load user data
+        loadUserData(user.uid);
+        
+        // Load shared tasks
+        loadSharedWithMe(user.uid);
+        loadSharedByMe(user.uid);
+        
+        // Load team members
+        loadTeamMembers(user.uid);
+        
+        // Hide loading overlay
+        setTimeout(() => {
+          loadingOverlay.classList.add('opacity-0');
+          setTimeout(() => {
+            loadingOverlay.classList.add('hidden');
+          }, 300);
+        }, 1000);
+      });
+      
+      // Logout
+      logoutBtn.addEventListener('click', function() {
+        auth.signOut().then(() => {
+          window.location.href = 'login.html';
+        }).catch(error => {
+          console.error('Error signing out:', error);
+          showToast('Error signing out: ' + error.message, 'error');
+        });
+      });
+      
+      // Tab switching
+      sharedWithMeTab.addEventListener('click', function() {
+        setActiveTab('sharedWithMe');
+      });
+      
+      sharedByMeTab.addEventListener('click', function() {
+        setActiveTab('sharedByMe');
+      });
+      
+      teamMembersTab.addEventListener('click', function() {
+        setActiveTab('teamMembers');
+      });
+      
+      // Set active tab
+      function setActiveTab(tab) {
+        // Reset all tabs
+        sharedWithMeTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+        sharedByMeTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+        teamMembersTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+        
+        sharedWithMeContent.classList.add('hidden');
+        sharedByMeContent.classList.add('hidden');
+        teamMembersContent.classList.add('hidden');
+        
+        // Set active tab
+        if (tab === 'sharedWithMe') {
+          sharedWithMeTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+          sharedWithMeContent.classList.remove('hidden');
+        } else if (tab === 'sharedByMe') {
+          sharedByMeTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+          sharedByMeContent.classList.remove('hidden');
+        } else if (tab === 'teamMembers') {
+          teamMembersTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+          teamMembersContent.classList.remove('hidden');
+        }
+      }
+      
+      // Invite team member
+      inviteTeamMemberBtn.addEventListener('click', function() {
+        inviteModal.classList.remove('hidden');
+      });
+      
+      emptyInviteBtn.addEventListener('click', function() {
+        inviteModal.classList.remove('hidden');
+      });
+      
+      // Close invite modal
+      closeInviteModal.addEventListener('click', function() {
+        inviteModal.classList.add('hidden');
+      });
+      
+      // Click outside to close invite modal
+      inviteModal.addEventListener('click', function(e) {
+        if (e.target === inviteModal) {
+          inviteModal.classList.add('hidden');
+        }
+      });
+      
+      // Invite form submit
+      inviteForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const email = inviteEmail.value.trim();
+        const message = inviteMessage.value.trim();
+        
+        if (!email) {
+          showToast('Please enter an email address', 'error');
+          return;
+        }
+        
+        // Find user by email
+        database.ref('users').orderByChild('email').equalTo(email).once('value')
+          .then(snapshot => {
+            if (snapshot.exists()) {
+              // User found
+              let recipientId = null;
+              let recipientData = null;
+              
+              snapshot.forEach(childSnapshot => {
+                recipientId = childSnapshot.key;
+                recipientData = childSnapshot.val();
+              });
+              
+              if (recipientId) {
+                // Check if already a team member
+                return database.ref(`teamMembers/${user.uid}/${recipientId}`).once('value')
+                  .then(teamSnapshot => {
+                    if (teamSnapshot.exists()) {
+                      throw new Error('This user is already a team member');
+                    }
+                    
+                    // Add to team members
+                    return database.ref(`teamMembers/${user.uid}/${recipientId}`).set({
+                      name: recipientData.name,
+                      email: recipientData.email,
+                      message: message,
+                      createdAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                  });
+              } else {
+                throw new Error('Recipient not found');
+              }
+            } else {
+              throw new Error('User with this email not found');
+            }
+          })
+          .then(() => {
+            inviteModal.classList.add('hidden');
+            inviteForm.reset();
+            showToast('Team member invited successfully', 'success');
+          })
+          .catch(error => {
+            console.error('Error inviting team member:', error);
+            showToast(error.message, 'error');
+          });
+      });
+      
+      // Close task details modal
+      closeTaskDetailsModal.addEventListener('click', function() {
+        taskDetailsModal.classList.add('hidden');
+      });
+      
+      // Click outside to close task details modal
+      taskDetailsModal.addEventListener('click', function(e) {
+        if (e.target === taskDetailsModal) {
+          taskDetailsModal.classList.add('hidden');
+        }
+      });
+      
+      // Accept task
+      acceptTaskBtn.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user || !currentTaskId || !currentTaskData) return;
+        
+        database.ref(`sharedTasks/${user.uid}/${currentTaskId}`).update({
+          status: 'accepted',
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+          taskDetailsModal.classList.add('hidden');
+          showToast('Task accepted successfully', 'success');
+        }).catch(error => {
+          console.error('Error accepting task:', error);
+          showToast('Error accepting task: ' + error.message, 'error');
+        });
+      });
+      
+      // Reject task
+      rejectTaskBtn.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user || !currentTaskId) return;
+        
+        if (confirm('Are you sure you want to reject this task?')) {
+          database.ref(`sharedTasks/${user.uid}/${currentTaskId}`).remove()
+            .then(() => {
+              taskDetailsModal.classList.add('hidden');
+              showToast('Task rejected successfully', 'success');
+            })
+            .catch(error => {
+              console.error('Error rejecting task:', error);
+              showToast('Error rejecting task: ' + error.message, 'error');
+            });
+        }
+      });
+      
+      // Filter shared with me tasks
+      sharedWithMeFilter.addEventListener('change', function() {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        loadSharedWithMe(user.uid, this.value);
+      });
+      
+      // Filter shared by me tasks
+      sharedByMeFilter.addEventListener('change', function() {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        loadSharedByMe(user.uid, this.value);
+      });
+      
+      // Load user data
+      function loadUserData(userId) {
+        database.ref('users/' + userId).once('value')
+          .then(snapshot => {
+            const userData = snapshot.val();
+            if (userData) {
+              userDisplayName.textContent = userData.name;
+            }
+          })
+          .catch(error => {
+            console.error('Error loading user data:', error);
+          });
+      }
+      
+      // Load shared with me tasks
+      function loadSharedWithMe(userId, filter = 'all') {
+        const sharedTasksRef = database.ref('sharedTasks/' + userId);
+        
+        sharedTasksRef.once('value')
+          .then(snapshot => {
+            sharedWithMeList.innerHTML = '';
+            
+            if (snapshot.exists()) {
+              let tasks = [];
+              
+              snapshot.forEach(childSnapshot => {
+                const taskId = childSnapshot.key;
+                const taskData = childSnapshot.val();
+                
+                tasks.push({
+                  id: taskId,
+                  ...taskData
+                });
+              });
+              
+              // Apply filter
+              if (filter !== 'all') {
+                tasks = tasks.filter(task => {
+                  if (filter === 'completed' && task.completed) return true;
+                  if (filter === 'accepted' && task.status === 'accepted' && !task.completed) return true;
+                  if (filter === 'pending' && (!task.status || task.status === 'pending')) return true;
+                  return false;
+                });
+              }
+              
+              // Sort by newest first
+              tasks.sort((a, b) => (b.sharedAt || 0) - (a.sharedAt || 0));
+              
+              if (tasks.length > 0) {
+                emptySharedWithMe.classList.add('hidden');
+                
+                tasks.forEach(task => {
+                  const row = createSharedWithMeRow(task);
+                  sharedWithMeList.appendChild(row);
+                });
+              } else {
+                sharedWithMeList.innerHTML = `
+                  <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No shared tasks found</td>
+                  </tr>
+                `;
+                emptySharedWithMe.classList.remove('hidden');
+              }
+            } else {
+              sharedWithMeList.innerHTML = `
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No shared tasks found</td>
+                </tr>
+              `;
+              emptySharedWithMe.classList.remove('hidden');
+            }
+          })
+          .catch(error => {
+            console.error('Error loading shared tasks:', error);
+            sharedWithMeList.innerHTML = `
+              <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Error loading shared tasks</td>
+              </tr>
+            `;
+          });
+      }
+      
+      // Load shared by me tasks
+      function loadSharedByMe(userId, filter = 'all') {
+        // This would require a more complex query in a real app
+        // For simplicity, we'll just show a placeholder
+        sharedByMeList.innerHTML = `
+          <tr>
+            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No shared tasks found</td>
+          </tr>
+        `;
+        emptySharedByMe.classList.remove('hidden');
+      }
+      
+      // Load team members
+      function loadTeamMembers(userId) {
+        const teamMembersRef = database.ref('teamMembers/' + userId);
+        
+        teamMembersRef.once('value')
+          .then(snapshot => {
+            teamMembersList.innerHTML = '';
+            
+            if (snapshot.exists()) {
+              let members = [];
+              
+              snapshot.forEach(childSnapshot => {
+                const memberId = childSnapshot.key;
+                const memberData = childSnapshot.val();
+                
+                members.push({
+                  id: memberId,
+                  ...memberData
+                });
+              });
+              
+              // Sort by newest first
+              members.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+              
+              if (members.length > 0) {
+                emptyTeamMembers.classList.add('hidden');
+                
+                members.forEach(member => {
+                  const item = createTeamMemberItem(member);
+                  teamMembersList.appendChild(item);
+                });
+              } else {
+                teamMembersList.innerHTML = `
+                  <li class="px-6 py-4 text-center text-sm text-gray-500">No team members found</li>
+                `;
+                emptyTeamMembers.classList.remove('hidden');
+              }
+            } else {
+              teamMembersList.innerHTML = `
+                <li class="px-6 py-4 text-center text-sm text-gray-500">No team members found</li>
+              `;
+              emptyTeamMembers.classList.remove('hidden');
+            }
+          })
+          .catch(error => {
+            console.error('Error loading team members:', error);
+            teamMembersList.innerHTML = `
+              <li class="px-6 py-4 text-center text-sm text-gray-500">Error loading team members</li>
+            `;
+          });
+      }
+      
+      // Create shared with me row
+      function createSharedWithMeRow(task) {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-colors';
+        
+        // Format date
+        let formattedDate = 'Unknown';
+        if (task.sharedAt) {
+          const date = new Date(task.sharedAt);
+          formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Priority badge class
+        let priorityClass = '';
+        let priorityText = task.priority || 'medium';
+        
+        switch (priorityText.toLowerCase()) {
+          case 'high':
+            priorityClass = 'bg-red-100 text-red-800';
+            break;
+          case 'medium':
+            priorityClass = 'bg-yellow-100 text-yellow-800';
+            break;
+          case 'low':
+            priorityClass = 'bg-green-100 text-green-800';
+            break;
+          default:
+            priorityClass = 'bg-gray-100 text-gray-800';
+        }
+        
+        // Status badge class
+        let statusClass = '';
+        let statusText = '';
+        
+        if (task.completed) {
+          statusClass = 'bg-green-100 text-green-800';
+          statusText = 'Completed';
+        } else if (task.status === 'accepted') {
+          statusClass = 'bg-blue-100 text-blue-800';
+          statusText = 'Accepted';
+        } else {
+          statusClass = 'bg-yellow-100 text-yellow-800';
+          statusText = 'Pending';
+        }
+        
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div>
+                <div class="text-sm font-medium text-gray-900">
+                  ${task.title || 'Untitled Task'}
+                </div>
+                ${task.description ? `<div class="text-xs text-gray-500 mt-1 max-w-xs truncate">${task.description}</div>` : ''}
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-8 w-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                ${task.fromName ? task.fromName.charAt(0).toUpperCase() : '?'}
+              </div>
+              <div class="ml-3">
+                <div class="text-sm font-medium text-gray-900">${task.fromName || 'Unknown'}</div>
+                <div class="text-xs text-gray-500">${task.fromEmail || ''}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">
+              ${priorityText.charAt(0).toUpperCase() + priorityText.slice(1)}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+              ${statusText}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${formattedDate}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <div class="flex justify-end items-center space-x-2 task-actions">
+              <button class="view-task-btn text-primary-600 hover:text-primary-900" data-task-id="${task.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              ${!task.completed && (!task.status || task.status === 'pending') ? `
+                <button class="accept-task-btn text-green-600 hover:text-green-900" data-task-id="${task.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+                <button class="reject-task-btn text-red-600 hover:text-red-900" data-task-id="${task.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        `;
+        
+        // Add event listeners
+        const viewBtn = row.querySelector('.view-task-btn');
+        viewBtn.addEventListener('click', function() {
+          openTaskDetails(this.dataset.taskId);
+        });
+        
+        const acceptBtn = row.querySelector('.accept-task-btn');
+        if (acceptBtn) {
+          acceptBtn.addEventListener('click', function() {
+            acceptTask(this.dataset.taskId);
+          });
+        }
+        
+        const rejectBtn = row.querySelector('.reject-task-btn');
+        if (rejectBtn) {
+          rejectBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to reject this task?')) {
+              rejectTask(this.dataset.taskId);
+            }
+          });
+        }
+        
+        return row;
+      }
+      
+      // Create team member item
+      function createTeamMemberItem(member) {
+        const item = document.createElement('li');
+        item.className = 'px-6 py-4 flex items-center justify-between';
+        
+        // Format date
+        let formattedDate = 'Unknown';
+        if (member.createdAt) {
+          const date = new Date(member.createdAt);
+          formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        item.innerHTML = `
+          <div class="flex items-center">
+            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+              ${member.name ? member.name.charAt(0).toUpperCase() : '?'}
+            </div>
+            <div class="ml-4">
+              <div class="text-sm font-medium text-gray-900">${member.name || 'Unknown'}</div>
+              <div class="text-xs text-gray-500">${member.email || ''}</div>
+              <div class="text-xs text-gray-500 mt-1">Added on ${formattedDate}</div>
+            </div>
+          </div>
+          <div class="flex items-center">
+            <button class="text-primary-600 hover:text-primary-900 p-1 mr-2" data-member-id="${member.id}" data-member-email="${member.email}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+            </button>
+            <button class="text-red-600 hover:text-red-900 p-1" data-member-id="${member.id}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
+              </svg>
+            </button>
+          </div>
+        `;
+        
+        // Add event listeners
+        const shareBtn = item.querySelector('button[data-member-email]');
+        shareBtn.addEventListener('click', function() {
+          // Redirect to tasks page with pre-filled share modal
+          const email = this.dataset.memberEmail;
+          localStorage.setItem('shareTaskEmail', email);
+          window.location.href = 'tasks.html?share=true';
+        });
+        
+        const removeBtn = item.querySelector('button[data-member-id]');
+        removeBtn.addEventListener('click', function() {
+          if (confirm('Are you sure you want to remove this team member?')) {
+            removeTeamMember(this.dataset.memberId);
+          }
+        });
+        
+        return item;
+      }
+      
+      // Open task details
+      function openTaskDetails(taskId) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        database.ref(`sharedTasks/${user.uid}/${taskId}`).once('value')
+          .then(snapshot => {
+            const taskData = snapshot.val();
+            if (taskData) {
+              currentTaskId = taskId;
+              currentTaskData = taskData;
+              
+              taskDetailsTitle.textContent = taskData.title || 'Untitled Task';
+              taskDetailsDescription.textContent = taskData.description || 'No description provided';
+              
+              // Priority
+              const priorityText = taskData.priority || 'medium';
+              taskDetailsPriority.textContent = priorityText.charAt(0).toUpperCase() + priorityText.slice(1);
+              
+              // Due date
+              if (taskData.dueDate) {
+                const date = new Date(taskData.dueDate);
+                taskDetailsDueDate.textContent = date.toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric' 
+                });
+              } else {
+                taskDetailsDueDate.textContent = 'No due date';
+              }
+              
+              // Shared on
+              if (taskData.sharedAt) {
+                const date = new Date(taskData.sharedAt);
+                taskDetailsSharedOn.textContent = date.toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric' 
+                });
+              } else {
+                taskDetailsSharedOn.textContent = 'Unknown';
+              }
+              
+              // Message
+              if (taskData.message) {
+                taskDetailsMessage.classList.remove('hidden');
+                taskDetailsMessageText.textContent = taskData.message;
+              } else {
+                taskDetailsMessage.classList.add('hidden');
+              }
+              
+              // User
+              taskDetailsUserInitial.textContent = taskData.fromName ? taskData.fromName.charAt(0).toUpperCase() : '?';
+              taskDetailsUserName.textContent = taskData.fromName || 'Unknown';
+              taskDetailsUserEmail.textContent = taskData.fromEmail || '';
+              
+              // Show/hide action buttons based on status
+              if (taskData.completed || taskData.status === 'accepted') {
+                acceptTaskBtn.classList.add('hidden');
+                rejectTaskBtn.classList.add('hidden');
+              } else {
+                acceptTaskBtn.classList.remove('hidden');
+                rejectTaskBtn.classList.remove('hidden');
+              }
+              
+              taskDetailsModal.classList.remove('hidden');
+            }
+          })
+          .catch(error => {
+            console.error('Error loading task details:', error);
+            showToast('Error loading task details', 'error');
+          });
+      }
+      
+      // Accept task
+      function acceptTask(taskId) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        database.ref(`sharedTasks/${user.uid}/${taskId}`).update({
+          status: 'accepted',
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+          showToast('Task accepted successfully', 'success');
+          loadSharedWithMe(user.uid, sharedWithMeFilter.value);
+        }).catch(error => {
+          console.error('Error accepting task:', error);
+          showToast('Error accepting task: ' + error.message, 'error');
+        });
+      }
+      
+      // Reject task
+      function rejectTask(taskId) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        database.ref(`sharedTasks/${user.uid}/${taskId}`).remove()
+          .then(() => {
+            showToast('Task rejected successfully', 'success');
+            loadSharedWithMe(user.uid, sharedWithMeFilter.value);
+          })
+          .catch(error => {
+            console.error('Error rejecting task:', error);
+            showToast('Error rejecting task: ' + error.message, 'error');
+          });
+      }
+      
+      // Remove team member
+      function removeTeamMember(memberId) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        database.ref(`teamMembers/${user.uid}/${memberId}`).remove()
+          .then(() => {
+            showToast('Team member removed successfully', 'success');
+            loadTeamMembers(user.uid);
+          })
+          .catch(error => {
+            console.error('Error removing team member:', error);
+            showToast('Error removing team member: ' + error.message, 'error');
+          });
+      }
+      
+      // Show toast notification
+      function showToast(message, type = 'info') {
+        toastMessage.textContent = message;
+        
+        toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-blue-500');
+        
+        if (type === 'success') {
+          toast.classList.add('bg-green-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          `;
+        } else if (type === 'error') {
+          toast.classList.add('bg-red-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          `;
+        } else {
+          toast.classList.add('bg-blue-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+          `;
+        }
+        
+        toast.classList.add('text-white');
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+          toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+      }
+      
+      // Close toast
+      toastClose.addEventListener('click', function() {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      });
+    });
+  </script>
+</body>
+</html>

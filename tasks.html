@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasks - TaskWave</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eefaff',
+              100: '#d7f2ff',
+              200: '#b8e8ff',
+              300: '#88d9ff',
+              400: '#53c0ff',
+              500: '#2a9eff',
+              600: '#137aff',
+              700: '#1466ff',
+              800: '#1852db',
+              900: '#1a45ad',
+              950: '#162b69',
+            },
+            secondary: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <style>
+    .task-item:hover .task-actions {
+      opacity: 1;
+    }
+    
+    .task-actions {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    
+    .priority-badge {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .priority-badge.high::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(255,0,0,0.1) 0%, rgba(255,0,0,0) 70%);
+      z-index: 0;
+    }
+    
+    .task-complete-animation {
+      animation: fadeGreen 1s ease-in-out;
+    }
+    
+    @keyframes fadeGreen {
+      0% { background-color: rgba(16, 185, 129, 0.1); }
+      50% { background-color: rgba(16, 185, 129, 0.2); }
+      100% { background-color: transparent; }
+    }
+    
+    .drag-over {
+      background-color: rgba(42, 158, 255, 0.1);
+      border: 2px dashed #2a9eff;
+    }
+    
+    .dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+  </style>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-80 z-50 flex items-center justify-center">
+    <div class="text-center">
+      <div class="inline-block animate-pulse">
+        <div class="text-4xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></div>
+      </div>
+      <p class="mt-4 text-gray-600">Loading your tasks...</p>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <a href="dashboard.html" class="text-2xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></a>
+          </div>
+          <nav class="ml-6 flex space-x-8">
+            <a href="dashboard.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Dashboard
+            </a>
+            <a href="tasks.html" class="border-primary-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Tasks
+            </a>
+            <a href="team.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              Team
+            </a>
+          </nav>
+        </div>
+        <div class="flex items-center">
+          <div class="ml-4 flex items-center md:ml-6">
+            <!-- Notification Bell -->
+            <button class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative">
+              <span class="sr-only">View notifications</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span id="notificationBadge" class="hidden absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+            </button>
+
+            <!-- Profile dropdown -->
+            <div class="ml-3 relative group">
+              <div class="flex items-center gap-2">
+                <span id="userDisplayName" class="text-sm font-medium text-gray-700">Loading...</span>
+                <div class="flex rounded-full bg-gray-100 text-sm focus:outline-none">
+                  <span class="inline-block h-8 w-8 rounded-full overflow-hidden bg-gray-200">
+                    <svg class="h-full w-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </span>
+                </div>
+                <button id="logoutBtn" class="text-sm text-gray-500 hover:text-red-500 transition-colors">Logout</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Tasks Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">My Tasks</h1>
+        <p class="text-gray-600 mt-1">Manage and organize all your tasks</p>
+      </div>
+      <div class="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
+        <div class="relative">
+          <input type="text" id="searchTasks" placeholder="Search tasks..." class="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute right-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <button id="addTaskBtn" class="bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add New Task
+        </button>
+      </div>
+    </div>
+
+    <!-- Task Filters -->
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+      <div class="flex flex-wrap gap-4 items-center">
+        <div>
+          <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select id="statusFilter" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <option value="all">All</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+        <div>
+          <label for="priorityFilter" class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+          <select id="priorityFilter" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <option value="all">All</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div>
+          <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+          <select id="sortBy" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="dueDate">Due Date</option>
+            <option value="priority">Priority</option>
+            <option value="title">Title</option>
+          </select>
+        </div>
+        <div class="ml-auto">
+          <label for="viewMode" class="block text-sm font-medium text-gray-700 mb-1">View</label>
+          <div class="flex border border-gray-300 rounded-md overflow-hidden">
+            <button id="listViewBtn" class="px-3 py-2 bg-primary-50 text-primary-700 border-r border-gray-300 focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+            </button>
+            <button id="boardViewBtn" class="px-3 py-2 bg-white text-gray-700 focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List View -->
+    <div id="listView" class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tasksList" class="bg-white divide-y divide-gray-200">
+          <!-- Will be populated dynamically -->
+          <tr>
+            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Loading tasks...</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="emptyTasksMessage" class="hidden py-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No tasks found</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by creating a new task.</p>
+        <div class="mt-6">
+          <button id="emptyAddTaskBtn" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:opacity-90 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Task
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Board View -->
+    <div id="boardView" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- To Do Column -->
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+          <h3 class="text-sm font-medium text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            To Do
+            <span id="todoCount" class="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">0</span>
+          </h3>
+        </div>
+        <div id="todoTasks" class="p-4 min-h-[200px] max-h-[600px] overflow-y-auto" ondragover="event.preventDefault()" ondrop="dropTask(event, 'todo')">
+          <!-- Will be populated dynamically -->
+          <div class="text-center text-sm text-gray-500 py-8">Loading tasks...</div>
+        </div>
+      </div>
+
+      <!-- In Progress Column -->
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+          <h3 class="text-sm font-medium text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            In Progress
+            <span id="inProgressCount" class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">0</span>
+          </h3>
+        </div>
+        <div id="inProgressTasks" class="p-4 min-h-[200px] max-h-[600px] overflow-y-auto" ondragover="event.preventDefault()" ondrop="dropTask(event, 'inProgress')">
+          <!-- Will be populated dynamically -->
+          <div class="text-center text-sm text-gray-500 py-8">Loading tasks...</div>
+        </div>
+      </div>
+
+      <!-- Completed Column -->
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+          <h3 class="text-sm font-medium text-gray-700 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Completed
+            <span id="completedCount" class="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">0</span>
+          </h3>
+        </div>
+        <div id="completedTasks" class="p-4 min-h-[200px] max-h-[600px] overflow-y-auto" ondragover="event.preventDefault()" ondrop="dropTask(event, 'completed')">
+          <!-- Will be populated dynamically -->
+          <div class="text-center text-sm text-gray-500 py-8">Loading tasks...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
+    <div id="toastIcon" class="mr-2"></div>
+    <div id="toastMessage"></div>
+    <button id="toastClose" class="ml-4 text-gray-400 hover:text-gray-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Task Modal -->
+  <div id="taskModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+      <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-4 py-3 text-white flex justify-between items-center">
+        <h3 id="modalTitle" class="text-lg font-medium">Add New Task</h3>
+        <button id="closeTaskModal" class="text-white hover:text-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="taskForm" class="p-6 space-y-4">
+        <input type="hidden" id="taskId">
+        <div>
+          <label for="taskTitle" class="block text-sm font-medium text-gray-700 mb-1">Task Title *</label>
+          <input type="text" id="taskTitle" name="taskTitle" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" required>
+        </div>
+        <div>
+          <label for="taskDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea id="taskDescription" name="taskDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="taskPriority" class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <select id="taskPriority" name="taskPriority" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div>
+            <label for="taskDueDate" class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+            <input type="date" id="taskDueDate" name="taskDueDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+          </div>
+        </div>
+        <div>
+          <label for="taskStatus" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select id="taskStatus" name="taskStatus" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <option value="todo">To Do</option>
+            <option value="inProgress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div class="pt-4 flex justify-end space-x-3">
+          <button type="button" id="deleteTaskBtn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors hidden">
+            Delete
+          </button>
+          <button type="button" id="shareTaskBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors hidden">
+            Share
+          </button>
+          <button type="submit" id="saveTaskBtn" class="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-md hover:opacity-90 transition-opacity">
+            Save Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Share Task Modal -->
+  <div id="shareTaskModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+      <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-4 py-3 text-white flex justify-between items-center">
+        <h3 class="text-lg font-medium">Share Task</h3>
+        <button id="closeShareModal" class="text-white hover:text-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6">
+        <div id="shareTaskInfo" class="mb-4 p-3 bg-gray-50 rounded-md">
+          <h4 id="shareTaskTitle" class="font-medium"></h4>
+          <p id="shareTaskDescription" class="text-sm text-gray-600 mt-1"></p>
+        </div>
+        <form id="shareTaskForm" class="space-y-4">
+          <input type="hidden" id="shareTaskId">
+          <div>
+            <label for="shareEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+            <input type="email" id="shareEmail" name="shareEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter email address" required>
+          </div>
+          <div>
+            <label for="shareMessage" class="block text-sm font-medium text-gray-700 mb-1">Message (optional)</label>
+            <textarea id="shareMessage" name="shareMessage" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Add a personal message"></textarea>
+          </div>
+          <div class="pt-4">
+            <button type="submit" class="w-full px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Share Task
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Configuration -->
+  <script src="js/firebase-config.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const auth = firebase.auth();
+      const database = firebase.database();
+      
+      // Elements
+      const userDisplayName = document.getElementById('userDisplayName');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const tasksList = document.getElementById('tasksList');
+      const emptyTasksMessage = document.getElementById('emptyTasksMessage');
+      const todoTasks = document.getElementById('todoTasks');
+      const inProgressTasks = document.getElementById('inProgressTasks');
+      const completedTasks = document.getElementById('completedTasks');
+      const todoCount = document.getElementById('todoCount');
+      const inProgressCount = document.getElementById('inProgressCount');
+      const completedCount = document.getElementById('completedCount');
+      const addTaskBtn = document.getElementById('addTaskBtn');
+      const emptyAddTaskBtn = document.getElementById('emptyAddTaskBtn');
+      const taskModal = document.getElementById('taskModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const closeTaskModal = document.getElementById('closeTaskModal');
+      const taskForm = document.getElementById('taskForm');
+      const taskId = document.getElementById('taskId');
+      const taskTitle = document.getElementById('taskTitle');
+      const taskDescription = document.getElementById('taskDescription');
+      const taskPriority = document.getElementById('taskPriority');
+      const taskDueDate = document.getElementById('taskDueDate');
+      const taskStatus = document.getElementById('taskStatus');
+      const deleteTaskBtn = document.getElementById('deleteTaskBtn');
+      const shareTaskBtn = document.getElementById('shareTaskBtn');
+      const statusFilter = document.getElementById('statusFilter');
+      const priorityFilter = document.getElementById('priorityFilter');
+      const sortBy = document.getElementById('sortBy');
+      const searchTasks = document.getElementById('searchTasks');
+      const listViewBtn = document.getElementById('listViewBtn');
+      const boardViewBtn = document.getElementById('boardViewBtn');
+      const listView = document.getElementById('listView');
+      const boardView = document.getElementById('boardView');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastClose = document.getElementById('toastClose');
+      const shareTaskModal = document.getElementById('shareTaskModal');
+      const closeShareModal = document.getElementById('closeShareModal');
+      const shareTaskForm = document.getElementById('shareTaskForm');
+      const shareTaskId = document.getElementById('shareTaskId');
+      const shareTaskTitle = document.getElementById('shareTaskTitle');
+      const shareTaskDescription = document.getElementById('shareTaskDescription');
+      const shareEmail = document.getElementById('shareEmail');
+      const shareMessage = document.getElementById('shareMessage');
+      
+      // Global variables
+      let allTasks = [];
+      let currentView = 'list';
+      
+      // Auth state change listener
+      auth.onAuthStateChanged(function(user) {
+        if (!user) {
+          // Redirect to login if not signed in
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        // Load user data
+        loadUserData(user.uid);
+        
+        // Load tasks
+        loadTasks(user.uid);
+        
+        // Hide loading overlay
+        setTimeout(() => {
+          loadingOverlay.classList.add('opacity-0');
+          setTimeout(() => {
+            loadingOverlay.classList.add('hidden');
+          }, 300);
+        }, 1000);
+      });
+      
+      // Logout
+      logoutBtn.addEventListener('click', function() {
+        auth.signOut().then(() => {
+          window.location.href = 'login.html';
+        }).catch(error => {
+          console.error('Error signing out:', error);
+          showToast('Error signing out: ' + error.message, 'error');
+        });
+      });
+      
+      // Add Task Button
+      addTaskBtn.addEventListener('click', function() {
+        openTaskModal('add');
+      });
+      
+      // Empty Add Task Button
+      emptyAddTaskBtn.addEventListener('click', function() {
+        openTaskModal('add');
+      });
+      
+      // Task Modal
+      function openTaskModal(mode, taskData = null) {
+        if (mode === 'add') {
+          modalTitle.textContent = 'Add New Task';
+          taskForm.reset();
+          taskId.value = '';
+          deleteTaskBtn.classList.add('hidden');
+          shareTaskBtn.classList.add('hidden');
+        } else if (mode === 'edit' && taskData) {
+          modalTitle.textContent = 'Edit Task';
+          taskId.value = taskData.id;
+          taskTitle.value = taskData.title || '';
+          taskDescription.value = taskData.description || '';
+          taskPriority.value = taskData.priority || 'medium';
+          taskDueDate.value = taskData.dueDate || '';
+          
+          // Set status based on completion
+          if (taskData.completed) {
+            taskStatus.value = 'completed';
+          } else if (taskData.status === 'inProgress') {
+            taskStatus.value = 'inProgress';
+          } else {
+            taskStatus.value = 'todo';
+          }
+          
+          deleteTaskBtn.classList.remove('hidden');
+          shareTaskBtn.classList.remove('hidden');
+        }
+        
+        taskModal.classList.remove('hidden');
+      }
+      
+      // Close Task Modal
+      closeTaskModal.addEventListener('click', function() {
+        taskModal.classList.add('hidden');
+      });
+      
+      // Click outside to close
+      taskModal.addEventListener('click', function(e) {
+        if (e.target === taskModal) {
+          taskModal.classList.add('hidden');
+        }
+      });
+      
+      // Task Form Submit
+      taskForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const id = taskId.value;
+        const title = taskTitle.value.trim();
+        const description = taskDescription.value.trim();
+        const priority = taskPriority.value;
+        const dueDate = taskDueDate.value;
+        const status = taskStatus.value;
+        
+        if (!title) {
+          showToast('Please enter a task title', 'error');
+          return;
+        }
+        
+        // Determine if task is new or existing
+        if (id) {
+          // Update existing task
+          database.ref(`tasks/${user.uid}/${id}`).update({
+            title: title,
+            description: description,
+            priority: priority,
+            dueDate: dueDate,
+            status: status,
+            completed: status === 'completed',
+            updatedAt: firebase.database.ServerValue.TIMESTAMP,
+            completedAt: status === 'completed' ? firebase.database.ServerValue.TIMESTAMP : null
+          }).then(() => {
+            taskModal.classList.add('hidden');
+            showToast('Task updated successfully', 'success');
+          }).catch(error => {
+            console.error('Error updating task:', error);
+            showToast('Error updating task: ' + error.message, 'error');
+          });
+        } else {
+          // Create new task
+          const newTaskRef = database.ref(`tasks/${user.uid}`).push();
+          newTaskRef.set({
+            title: title,
+            description: description,
+            priority: priority,
+            dueDate: dueDate,
+            status: status,
+            completed: status === 'completed',
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            completedAt: status === 'completed' ? firebase.database.ServerValue.TIMESTAMP : null
+          }).then(() => {
+            taskModal.classList.add('hidden');
+            showToast('Task added successfully', 'success');
+          }).catch(error => {
+            console.error('Error adding task:', error);
+            showToast('Error adding task: ' + error.message, 'error');
+          });
+        }
+      });
+      
+      // Delete Task Button
+      deleteTaskBtn.addEventListener('click', function() {
+        const id = taskId.value;
+        if (!id) return;
+        
+        if (confirm('Are you sure you want to delete this task?')) {
+          deleteTask(id);
+        }
+      });
+      
+      // Share Task Button
+      shareTaskBtn.addEventListener('click', function() {
+        const id = taskId.value;
+        if (!id) return;
+        
+        const task = allTasks.find(t => t.id === id);
+        if (task) {
+          shareTaskId.value = id;
+          shareTaskTitle.textContent = task.title;
+          shareTaskDescription.textContent = task.description || 'No description';
+          
+          taskModal.classList.add('hidden');
+          shareTaskModal.classList.remove('hidden');
+        }
+      });
+      
+      // Close Share Modal
+      closeShareModal.addEventListener('click', function() {
+        shareTaskModal.classList.add('hidden');
+      });
+      
+      // Click outside to close share modal
+      shareTaskModal.addEventListener('click', function(e) {
+        if (e.target === shareTaskModal) {
+          shareTaskModal.classList.add('hidden');
+        }
+      });
+      
+      // Share Task Form Submit
+      shareTaskForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const taskId = shareTaskId.value;
+        const email = shareEmail.value.trim();
+        const message = shareMessage.value.trim();
+        
+        if (!taskId || !email) {
+          showToast('Please enter an email address', 'error');
+          return;
+        }
+        
+        // Find the task to share
+        const task = allTasks.find(t => t.id === taskId);
+        if (!task) {
+          showToast('Task not found', 'error');
+          return;
+        }
+        
+        // First, find the user by email
+        database.ref('users').orderByChild('email').equalTo(email).once('value')
+          .then(snapshot => {
+            if (snapshot.exists()) {
+              // User found
+              let recipientId = null;
+              snapshot.forEach(childSnapshot => {
+                recipientId = childSnapshot.key;
+              });
+              
+              if (recipientId) {
+                // Share the task
+                const sharedTaskRef = database.ref(`sharedTasks/${recipientId}/${taskId}`);
+                return sharedTaskRef.set({
+                  title: task.title,
+                  description: task.description || '',
+                  priority: task.priority,
+                  dueDate: task.dueDate || '',
+                  status: task.status || 'todo',
+                  completed: task.completed || false,
+                  fromUid: user.uid,
+                  fromName: user.displayName || '',
+                  fromEmail: user.email,
+                  message: message,
+                  sharedAt: firebase.database.ServerValue.TIMESTAMP,
+                  originalTaskId: taskId
+                });
+              } else {
+                throw new Error('Recipient not found');
+              }
+            } else {
+              throw new Error('User with this email not found');
+            }
+          })
+          .then(() => {
+            shareTaskModal.classList.add('hidden');
+            shareTaskForm.reset();
+            showToast('Task shared successfully', 'success');
+          })
+          .catch(error => {
+            console.error('Error sharing task:', error);
+            showToast(error.message, 'error');
+          });
+      });
+      
+      // Delete task
+      function deleteTask(taskId) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        database.ref(`tasks/${user.uid}/${taskId}`).remove()
+          .then(() => {
+            taskModal.classList.add('hidden');
+            showToast('Task deleted successfully', 'success');
+          })
+          .catch(error => {
+            console.error('Error deleting task:', error);
+            showToast('Error deleting task: ' + error.message, 'error');
+          });
+      }
+      
+      // Load user data
+      function loadUserData(userId) {
+        database.ref('users/' + userId).once('value')
+          .then(snapshot => {
+            const userData = snapshot.val();
+            if (userData) {
+              userDisplayName.textContent = userData.name;
+            }
+          })
+          .catch(error => {
+            console.error('Error loading user data:', error);
+          });
+      }
+      
+      // Load tasks
+      function loadTasks(userId) {
+        const tasksRef = database.ref('tasks/' + userId);
+        
+        tasksRef.on('value', snapshot => {
+          allTasks = [];
+          
+          if (snapshot.exists()) {
+            snapshot.forEach(childSnapshot => {
+              const taskId = childSnapshot.key;
+              const taskData = childSnapshot.val();
+              
+              allTasks.push({
+                id: taskId,
+                ...taskData
+              });
+            });
+            
+            // Apply filters and sort
+            filterAndDisplayTasks();
+          } else {
+            // No tasks
+            displayEmptyState();
+          }
+        });
+      }
+      
+      // Filter and display tasks
+      function filterAndDisplayTasks() {
+        const statusFilterValue = statusFilter.value;
+        const priorityFilterValue = priorityFilter.value;
+        const sortByValue = sortBy.value;
+        const searchValue = searchTasks.value.toLowerCase();
+        
+        // Filter tasks
+        let filteredTasks = allTasks.filter(task => {
+          // Status filter
+          if (statusFilterValue === 'completed' && !task.completed) return false;
+          if (statusFilterValue === 'pending' && task.completed) return false;
+          
+          // Priority filter
+          if (priorityFilterValue !== 'all' && task.priority !== priorityFilterValue) return false;
+          
+          // Search filter
+          if (searchValue && 
+              !task.title.toLowerCase().includes(searchValue) && 
+              !(task.description && task.description.toLowerCase().includes(searchValue))) {
+            return false;
+          }
+          
+          return true;
+        });
+        
+        // Sort tasks
+        filteredTasks.sort((a, b) => {
+          switch(sortByValue) {
+            case 'newest':
+              return (b.createdAt || 0) - (a.createdAt || 0);
+            case 'oldest':
+              return (a.createdAt || 0) - (b.createdAt || 0);
+            case 'dueDate':
+              if (!a.dueDate && !b.dueDate) return 0;
+              if (!a.dueDate) return 1;
+              if (!b.dueDate) return -1;
+              return new Date(a.dueDate) - new Date(b.dueDate);
+            case 'priority':
+              const priorityOrder = { high: 0, medium: 1, low: 2 };
+              return priorityOrder[a.priority || 'medium'] - priorityOrder[b.priority || 'medium'];
+            case 'title':
+              return (a.title || '').localeCompare(b.title || '');
+            default:
+              return (b.createdAt || 0) - (a.createdAt || 0);
+          }
+        });
+        
+        // Display tasks based on current view
+        if (currentView === 'list') {
+          displayListView(filteredTasks);
+        } else {
+          displayBoardView(filteredTasks);
+        }
+        
+        // Show/hide empty state
+        if (filteredTasks.length === 0) {
+          emptyTasksMessage.classList.remove('hidden');
+        } else {
+          emptyTasksMessage.classList.add('hidden');
+        }
+      }
+      
+      // Display empty state
+      function displayEmptyState() {
+        tasksList.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No tasks found</td>
+          </tr>
+        `;
+        
+        todoTasks.innerHTML = '<div class="text-center text-sm text-gray-500 py-8">No tasks</div>';
+        inProgressTasks.innerHTML = '<div class="text-center text-sm text-gray-500 py-8">No tasks</div>';
+        completedTasks.innerHTML = '<div class="text-center text-sm text-gray-500 py-8">No tasks</div>';
+        
+        todoCount.textContent = '0';
+        inProgressCount.textContent = '0';
+        completedCount.textContent = '0';
+        
+        emptyTasksMessage.classList.remove('hidden');
+      }
+      
+      // Display list view
+      function displayListView(tasks) {
+        tasksList.innerHTML = '';
+        
+        if (tasks.length === 0) {
+          tasksList.innerHTML = `
+            <tr>
+              <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No tasks found</td>
+            </tr>
+          `;
+          return;
+        }
+        
+        tasks.forEach(task => {
+          const row = createTaskRow(task);
+          tasksList.appendChild(row);
+        });
+      }
+      
+      // Display board view
+      function displayBoardView(tasks) {
+        // Clear columns
+        todoTasks.innerHTML = '';
+        inProgressTasks.innerHTML = '';
+        completedTasks.innerHTML = '';
+        
+        // Count for each column
+        let todoCount = 0;
+        let inProgressCount = 0;
+        let completedCount = 0;
+        
+        tasks.forEach(task => {
+          const card = createTaskCard(task);
+          
+          if (task.completed) {
+            completedTasks.appendChild(card);
+            completedCount++;
+          } else if (task.status === 'inProgress') {
+            inProgressTasks.appendChild(card);
+            inProgressCount++;
+          } else {
+            todoTasks.appendChild(card);
+            todoCount++;
+          }
+        });
+        
+        // Update counters
+        document.getElementById('todoCount').textContent = todoCount;
+        document.getElementById('inProgressCount').textContent = inProgressCount;
+        document.getElementById('completedCount').textContent = completedCount;
+        
+        // Show empty state if needed
+        if (todoCount === 0) {
+          todoTasks.innerHTML = '<div class="text-center text-sm text-gray-500 py-8">No tasks</div>';
+        }
+        
+        if (inProgressCount === 0) {
+          inProgressTasks.innerHTML = '<div class="text-center text-sm text-gray-500 py-8">No tasks</div>';
+        }
+        
+        if (completedCount === 0) {
+          completedTasks.innerHTML = '<div class="text-center text-sm text-gray-500 py-8">No tasks</div>';
+        }
+      }
+      
+      // Create task row for table
+      function createTaskRow(task) {
+        const row = document.createElement('tr');
+        row.className = 'task-item hover:bg-gray-50 transition-colors';
+        
+        if (task.completed) {
+          row.classList.add('bg-gray-50');
+        }
+        
+        // Format date
+        let formattedDate = 'No due date';
+        if (task.dueDate) {
+          const date = new Date(task.dueDate);
+          formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Priority badge class
+        let priorityClass = '';
+        let priorityText = task.priority || 'medium';
+        
+        switch (priorityText.toLowerCase()) {
+          case 'high':
+            priorityClass = 'bg-red-100 text-red-800';
+            break;
+          case 'medium':
+            priorityClass = 'bg-yellow-100 text-yellow-800';
+            break;
+          case 'low':
+            priorityClass = 'bg-green-100 text-green-800';
+            break;
+          default:
+            priorityClass = 'bg-gray-100 text-gray-800';
+        }
+        
+        // Status badge class
+        const statusClass = task.completed 
+          ? 'bg-green-100 text-green-800' 
+          : task.status === 'inProgress'
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-blue-100 text-blue-800';
+        
+        const statusText = task.completed 
+          ? 'Completed' 
+          : task.status === 'inProgress'
+            ? 'In Progress'
+            : 'To Do';
+        
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-4 w-4 mr-3">
+                <input type="checkbox" class="task-checkbox h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded" 
+                  data-task-id="${task.id}" ${task.completed ? 'checked' : ''}>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-gray-900 ${task.completed ? 'line-through text-gray-500' : ''}">
+                  ${task.title}
+                </div>
+                ${task.description ? `<div class="text-xs text-gray-500 mt-1 max-w-xs truncate">${task.description}</div>` : ''}
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="priority-badge ${task.priority === 'high' ? 'high' : ''} inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">
+              ${priorityText.charAt(0).toUpperCase() + priorityText.slice(1)}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+              ${statusText}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${formattedDate}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <div class="flex justify-end items-center space-x-2 task-actions">
+              <button class="edit-task-btn text-primary-600 hover:text-primary-900" data-task-id="${task.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button class="share-task-btn text-blue-600 hover:text-blue-900" data-task-id="${task.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              </button>
+              <button class="delete-task-btn text-red-600 hover:text-red-900" data-task-id="${task.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        `;
+        
+        // Add event listeners
+        const checkbox = row.querySelector('.task-checkbox');
+        checkbox.addEventListener('change', function() {
+          toggleTaskCompletion(this.dataset.taskId, this.checked);
+          
+          // Add animation class
+          if (this.checked) {
+            row.classList.add('task-complete-animation');
+            setTimeout(() => {
+              row.classList.remove('task-complete-animation');
+            }, 1000);
+          }
+        });
+        
+        const editBtn = row.querySelector('.edit-task-btn');
+        editBtn.addEventListener('click', function() {
+          const task = allTasks.find(t => t.id === this.dataset.taskId);
+          if (task) {
+            openTaskModal('edit', task);
+          }
+        });
+        
+        const shareBtn = row.querySelector('.share-task-btn');
+        shareBtn.addEventListener('click', function() {
+          const task = allTasks.find(t => t.id === this.dataset.taskId);
+          if (task) {
+            shareTaskId.value = task.id;
+            shareTaskTitle.textContent = task.title;
+            shareTaskDescription.textContent = task.description || 'No description';
+            shareTaskModal.classList.remove('hidden');
+          }
+        });
+        
+        const deleteBtn = row.querySelector('.delete-task-btn');
+        deleteBtn.addEventListener('click', function() {
+          if (confirm('Are you sure you want to delete this task?')) {
+            deleteTask(this.dataset.taskId);
+          }
+        });
+        
+        return row;
+      }
+      
+      // Create task card for board view
+      function createTaskCard(task) {
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-gray-200 rounded-md p-3 mb-3 shadow-sm hover:shadow transition-shadow task-item';
+        card.draggable = true;
+        card.dataset.taskId = task.id;
+        
+        // Priority class
+        let priorityClass = '';
+        let priorityText = task.priority || 'medium';
+        
+        switch (priorityText.toLowerCase()) {
+          case 'high':
+            priorityClass = 'bg-red-100 text-red-800';
+            break;
+          case 'medium':
+            priorityClass = 'bg-yellow-100 text-yellow-800';
+            break;
+          case 'low':
+            priorityClass = 'bg-green-100 text-green-800';
+            break;
+          default:
+            priorityClass = 'bg-gray-100 text-gray-800';
+        }
+        
+        // Format date
+        let dueDateHtml = '';
+        if (task.dueDate) {
+          const date = new Date(task.dueDate);
+          const formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          dueDateHtml = `
+            <div class="flex items-center text-xs text-gray-500 mt-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              ${formattedDate}
+            </div>
+          `;
+        }
+        
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div class="flex items-center">
+              <input type="checkbox" class="task-checkbox h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mr-2" 
+                data-task-id="${task.id}" ${task.completed ? 'checked' : ''}>
+              <h3 class="text-sm font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-900'}">${task.title}</h3>
+            </div>
+            <span class="priority-badge ${task.priority === 'high' ? 'high' : ''} inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityClass}">
+              ${priorityText.charAt(0).toUpperCase() + priorityText.slice(1)}
+            </span>
+          </div>
+          ${task.description ? `<p class="mt-1 text-xs text-gray-600 line-clamp-2">${task.description}</p>` : ''}
+          ${dueDateHtml}
+          <div class="mt-3 flex justify-end space-x-2 task-actions">
+            <button class="edit-task-btn text-primary-600 hover:text-primary-900 p-1" data-task-id="${task.id}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+            <button class="share-task-btn text-blue-600 hover:text-blue-900 p-1" data-task-id="${task.id}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+            </button>
+            <button class="delete-task-btn text-red-600 hover:text-red-900 p-1" data-task-id="${task.id}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        `;
+        
+        // Add event listeners
+        const checkbox = card.querySelector('.task-checkbox');
+        checkbox.addEventListener('change', function() {
+          toggleTaskCompletion(this.dataset.taskId, this.checked);
+        });
+        
+        const editBtn = card.querySelector('.edit-task-btn');
+        editBtn.addEventListener('click', function() {
+          const task = allTasks.find(t => t.id === this.dataset.taskId);
+          if (task) {
+            openTaskModal('edit', task);
+          }
+        });
+        
+        const shareBtn = card.querySelector('.share-task-btn');
+        shareBtn.addEventListener('click', function() {
+          const task = allTasks.find(t => t.id === this.dataset.taskId);
+          if (task) {
+            shareTaskId.value = task.id;
+            shareTaskTitle.textContent = task.title;
+            shareTaskDescription.textContent = task.description || 'No description';
+            shareTaskModal.classList.remove('hidden');
+          }
+        });
+        
+        const deleteBtn = card.querySelector('.delete-task-btn');
+        deleteBtn.addEventListener('click', function() {
+          if (confirm('Are you sure you want to delete this task?')) {
+            deleteTask(this.dataset.taskId);
+          }
+        });
+        
+        // Drag and drop
+        card.addEventListener('dragstart', function(e) {
+          e.dataTransfer.setData('text/plain', task.id);
+          this.classList.add('dragging');
+        });
+        
+        card.addEventListener('dragend', function() {
+          this.classList.remove('dragging');
+        });
+        
+        return card;
+      }
+      
+      // Toggle task completion
+      function toggleTaskCompletion(taskId, completed) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const updates = {
+          completed: completed,
+          status: completed ? 'completed' : 'todo',
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        if (completed) {
+          updates.completedAt = firebase.database.ServerValue.TIMESTAMP;
+        }
+        
+        database.ref(`tasks/${user.uid}/${taskId}`).update(updates)
+          .then(() => {
+            showToast(completed ? 'Task completed!' : 'Task marked as incomplete', 'success');
+          })
+          .catch(error => {
+            console.error('Error updating task:', error);
+            showToast('Error updating task', 'error');
+          });
+      }
+      
+      // Drag and drop functions
+      function dropTask(event, status) {
+        event.preventDefault();
+        const taskId = event.dataTransfer.getData('text/plain');
+        const user = auth.currentUser;
+        
+        if (!taskId || !user) return;
+        
+        // Remove drag-over class
+        event.target.closest('div').classList.remove('drag-over');
+        
+        // Update task status
+        const updates = {
+          status: status,
+          completed: status === 'completed',
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        if (status === 'completed') {
+          updates.completedAt = firebase.database.ServerValue.TIMESTAMP;
+        }
+        
+        database.ref(`tasks/${user.uid}/${taskId}`).update(updates)
+          .then(() => {
+            showToast(`Task moved to ${status.replace(/([A-Z])/g, ' $1').toLowerCase()}`, 'success');
+          })
+          .catch(error => {
+            console.error('Error updating task:', error);
+            showToast('Error updating task', 'error');
+          });
+      }
+      
+      // Add drag-over class
+      document.querySelectorAll('#todoTasks, #inProgressTasks, #completedTasks').forEach(column => {
+        column.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          this.classList.add('drag-over');
+        });
+        
+        column.addEventListener('dragleave', function() {
+          this.classList.remove('drag-over');
+        });
+        
+        column.addEventListener('drop', function() {
+          this.classList.remove('drag-over');
+        });
+      });
+      
+      // Filter and sort event listeners
+      statusFilter.addEventListener('change', filterAndDisplayTasks);
+      priorityFilter.addEventListener('change', filterAndDisplayTasks);
+      sortBy.addEventListener('change', filterAndDisplayTasks);
+      
+      // Search input
+      searchTasks.addEventListener('input', filterAndDisplayTasks);
+      
+      // View toggle
+      listViewBtn.addEventListener('click', function() {
+        if (currentView !== 'list') {
+          currentView = 'list';
+          listView.classList.remove('hidden');
+          boardView.classList.add('hidden');
+          
+          listViewBtn.classList.add('bg-primary-50', 'text-primary-700');
+          listViewBtn.classList.remove('bg-white', 'text-gray-700');
+          
+          boardViewBtn.classList.add('bg-white', 'text-gray-700');
+          boardViewBtn.classList.remove('bg-primary-50', 'text-primary-700');
+          
+          filterAndDisplayTasks();
+        }
+      });
+      
+      boardViewBtn.addEventListener('click', function() {
+        if (currentView !== 'board') {
+          currentView = 'board';
+          listView.classList.add('hidden');
+          boardView.classList.remove('hidden');
+          
+          boardViewBtn.classList.add('bg-primary-50', 'text-primary-700');
+          boardViewBtn.classList.remove('bg-white', 'text-gray-700');
+          
+          listViewBtn.classList.add('bg-white', 'text-gray-700');
+          listViewBtn.classList.remove('bg-primary-50', 'text-primary-700');
+          
+          filterAndDisplayTasks();
+        }
+      });
+      
+      // Show toast notification
+      function showToast(message, type = 'info') {
+        toastMessage.textContent = message;
+        
+        toast.classList.remove('bg-green-500', 'bg-red-500', 'bg-blue-500');
+        
+        if (type === 'success') {
+          toast.classList.add('bg-green-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+          `;
+        } else if (type === 'error') {
+          toast.classList.add('bg-red-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          `;
+        } else {
+          toast.classList.add('bg-blue-500');
+          toastIcon.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+          `;
+        }
+        
+        toast.classList.add('text-white');
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+          toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+      }
+      
+      // Close toast
+      toastClose.addEventListener('click', function() {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      });
+    });
+  </script>
+</body>
+</html>
