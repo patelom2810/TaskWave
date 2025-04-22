@@ -48,7 +48,68 @@
     .wave-bg {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230099ff' fill-opacity='0.1' d='M0,224L48,208C96,192,192,160,288,154.7C384,149,480,171,576,181.3C672,192,768,192,864,170.7C960,149,1056,107,1152,101.3C1248,96,1344,128,1392,144L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-size: 100% 40%;
+      background-size: cover;
+      background-position: center top;
+    }
+    
+    @media (max-width: 640px) {
+      .wave-bg {
+        background-size: 250% 40%;
+      }
+    }
+    
+    .form-input-focus {
+      box-shadow: 0 0 0 2px rgba(42, 158, 255, 0.2);
+    }
+    
+    .form-input-error {
+      border-color: #f87171;
+    }
+    
+    .form-input-error:focus {
+      box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2);
+    }
+    
+    .shake {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+    
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+      transition: background-color 5000s ease-in-out 0s;
+      -webkit-text-fill-color: inherit;
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .shake {
+        animation: none;
+      }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .slide-out {
+      animation: slideOut 0.5s ease-in-out forwards;
+    }
+    
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-20px); }
     }
   </style>
   
@@ -58,55 +119,76 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen wave-bg">
-  <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="min-h-screen flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-md">
       <a href="index.html" class="flex justify-center">
-        <div class="text-3xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></div>
+        <div class="text-2xl sm:text-3xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></div>
       </a>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      <h2 class="mt-4 sm:mt-6 text-center text-2xl sm:text-3xl font-extrabold text-gray-900">
         Create your account
       </h2>
       <p class="mt-2 text-center text-sm text-gray-600">
         Or
-        <a href="login.html" class="font-medium text-primary-600 hover:text-primary-500">
+        <a href="login.html" class="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200">
           sign in to existing account
         </a>
       </p>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        <form id="registerForm" class="space-y-6">
+    <div class="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="bg-white py-6 sm:py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
+        <!-- Status Message -->
+        <div id="statusMessage" class="hidden mb-4 px-3 py-2 rounded text-center text-white text-sm fade-in"></div>
+        
+        <form id="registerForm" class="space-y-5 sm:space-y-6">
           <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">
+            <label for="registerName" class="block text-sm font-medium text-gray-700">
               Full name
             </label>
             <div class="mt-1">
               <input id="registerName" name="name" type="text" autocomplete="name" required
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200"
                 placeholder="John Doe">
+              <p id="nameError" class="mt-1 text-sm text-red-600 hidden"></p>
             </div>
           </div>
 
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">
+            <label for="registerEmail" class="block text-sm font-medium text-gray-700">
               Email address
             </label>
             <div class="mt-1">
               <input id="registerEmail" name="email" type="email" autocomplete="email" required
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200"
                 placeholder="you@example.com">
+              <p id="emailError" class="mt-1 text-sm text-red-600 hidden"></p>
             </div>
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">
+            <label for="registerPassword" class="block text-sm font-medium text-gray-700">
               Password
             </label>
-            <div class="mt-1">
+            <div class="mt-1 relative">
               <input id="registerPassword" name="password" type="password" autocomplete="new-password" required
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200"
                 placeholder="••••••••">
+              <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              <p id="passwordError" class="mt-1 text-sm text-red-600 hidden"></p>
+            </div>
+            <!-- Password strength indicator -->
+            <div class="mt-2">
+              <div class="flex items-center">
+                <div class="h-1 flex-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div id="passwordStrength" class="h-full w-0 bg-gray-400 transition-all duration-300"></div>
+                </div>
+                <span id="strengthText" class="ml-2 text-xs text-gray-500"></span>
+              </div>
             </div>
           </div>
 
@@ -116,33 +198,40 @@
             </label>
             <div class="mt-1">
               <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200"
                 placeholder="••••••••">
+              <p id="confirmPasswordError" class="mt-1 text-sm text-red-600 hidden"></p>
             </div>
           </div>
 
-          <div class="flex items-center">
-            <input id="agree-terms" name="agree-terms" type="checkbox" required
-              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
-            <label for="agree-terms" class="ml-2 block text-sm text-gray-900">
-              I agree to the 
-              <a href="#" class="text-primary-600 hover:text-primary-500">Terms of Service</a>
-              and
-              <a href="#" class="text-primary-600 hover:text-primary-500">Privacy Policy</a>
-            </label>
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input id="agree-terms" name="agree-terms" type="checkbox" required
+                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded transition-colors duration-200">
+            </div>
+            <div class="ml-2 text-sm">
+              <label for="agree-terms" class="text-gray-700">
+                I agree to the 
+                <a href="#" class="text-primary-600 hover:text-primary-500 transition-colors duration-200">Terms of Service</a>
+                and
+                <a href="#" class="text-primary-600 hover:text-primary-500 transition-colors duration-200">Privacy Policy</a>
+              </label>
+              <p id="termsError" class="mt-1 text-sm text-red-600 hidden">You must agree to the terms</p>
+            </div>
           </div>
 
           <div>
-            <button type="submit"
-              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-600 hover:from-primary-700 hover:to-secondary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+            <button type="submit" id="registerButton"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-600 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200">
               Create account
             </button>
           </div>
         </form>
-
-        <!-- Status Message -->
-        <div id="statusMessage" class="hidden mt-4 px-4 py-3 rounded text-center text-white"></div>
       </div>
+    </div>
+    
+    <div class="mt-8 text-center text-xs text-gray-500">
+      <p>© 2025 TaskWave. All rights reserved.</p>
     </div>
   </div>
 
@@ -159,33 +248,170 @@
         }
       });
 
-      // Register Form
+      // Form elements
       const registerForm = document.getElementById('registerForm');
+      const registerButton = document.getElementById('registerButton');
       const statusMessage = document.getElementById('statusMessage');
+      const nameInput = document.getElementById('registerName');
+      const emailInput = document.getElementById('registerEmail');
+      const passwordInput = document.getElementById('registerPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+      const termsCheckbox = document.getElementById('agree-terms');
+      const togglePasswordBtn = document.getElementById('togglePassword');
+      const passwordStrength = document.getElementById('passwordStrength');
+      const strengthText = document.getElementById('strengthText');
+      
+      // Error message elements
+      const nameError = document.getElementById('nameError');
+      const emailError = document.getElementById('emailError');
+      const passwordError = document.getElementById('passwordError');
+      const confirmPasswordError = document.getElementById('confirmPasswordError');
+      const termsError = document.getElementById('termsError');
 
+      // Toggle password visibility
+      togglePasswordBtn.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        // Toggle eye icon
+        if (type === 'text') {
+          togglePasswordBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          `;
+        } else {
+          togglePasswordBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          `;
+        }
+      });
+
+      // Check password strength
+      passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        let message = '';
+        let color = 'bg-gray-400';
+        
+        if (password.length > 0) {
+          // Length check
+          if (password.length >= 8) strength += 25;
+          
+          // Contains lowercase
+          if (/[a-z]/.test(password)) strength += 25;
+          
+          // Contains uppercase
+          if (/[A-Z]/.test(password)) strength += 25;
+          
+          // Contains number or special char
+          if (/[0-9!@#$%^&*]/.test(password)) strength += 25;
+          
+          // Set color and message based on strength
+          if (strength <= 25) {
+            color = 'bg-red-500';
+            message = 'Weak';
+          } else if (strength <= 50) {
+            color = 'bg-orange-500';
+            message = 'Fair';
+          } else if (strength <= 75) {
+            color = 'bg-yellow-500';
+            message = 'Good';
+          } else {
+            color = 'bg-green-500';
+            message = 'Strong';
+          }
+        }
+        
+        // Update UI
+        passwordStrength.className = `h-full transition-all duration-300 ${color}`;
+        passwordStrength.style.width = `${strength}%`;
+        strengthText.textContent = message;
+      });
+      
+      // Clear error when input changes
+      nameInput.addEventListener('input', () => clearError(nameError));
+      emailInput.addEventListener('input', () => clearError(emailError));
+      passwordInput.addEventListener('input', () => clearError(passwordError));
+      confirmPasswordInput.addEventListener('input', () => clearError(confirmPasswordError));
+      termsCheckbox.addEventListener('change', () => clearError(termsError));
+      
+      // Register Form submission
       registerForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const name = document.getElementById('registerName').value;
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
+        // Clear previous errors
+        clearAllErrors();
         
-        // Validate form
-        if (!name || !email || !password || !confirmPassword) {
-          showStatus('Please fill in all fields', 'error');
+        // Get form values
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const agreeTerms = termsCheckbox.checked;
+        
+        // Client-side validation
+        let isValid = true;
+        
+        // Validate name
+        if (!name) {
+          showInputError(nameError, 'Please enter your name');
+          isValid = false;
+        } else if (name.length < 2) {
+          showInputError(nameError, 'Name must be at least 2 characters');
+          isValid = false;
+        }
+        
+        // Validate email
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+          showInputError(emailError, 'Please enter your email');
+          isValid = false;
+        } else if (!emailPattern.test(email)) {
+          showInputError(emailError, 'Please enter a valid email address');
+          isValid = false;
+        }
+        
+        // Validate password
+        if (!password) {
+          showInputError(passwordError, 'Please enter a password');
+          isValid = false;
+        } else if (password.length < 6) {
+          showInputError(passwordError, 'Password must be at least 6 characters');
+          isValid = false;
+        }
+        
+        // Validate confirm password
+        if (!confirmPassword) {
+          showInputError(confirmPasswordError, 'Please confirm your password');
+          isValid = false;
+        } else if (password !== confirmPassword) {
+          showInputError(confirmPasswordError, 'Passwords do not match');
+          isValid = false;
+        }
+        
+        // Validate terms
+        if (!agreeTerms) {
+          termsError.classList.remove('hidden');
+          isValid = false;
+        }
+        
+        if (!isValid) {
           return;
         }
         
-        if (password !== confirmPassword) {
-          showStatus('Passwords do not match', 'error');
-          return;
-        }
-        
-        if (password.length < 6) {
-          showStatus('Password should be at least 6 characters', 'error');
-          return;
-        }
+        // Show loading state
+        registerButton.disabled = true;
+        registerButton.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Creating account...
+        `;
         
         // Create account
         firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -206,14 +432,36 @@
             }, 1500);
           })
           .catch((error) => {
-            showStatus(error.message, 'error');
+            // Reset button
+            registerButton.disabled = false;
+            registerButton.innerHTML = 'Create account';
+            
+            // Handle specific Firebase errors
+            let errorMsg = '';
+            switch (error.code) {
+              case 'auth/email-already-in-use':
+                errorMsg = 'This email is already in use';
+                showInputError(emailError, errorMsg);
+                break;
+              case 'auth/invalid-email':
+                errorMsg = 'Invalid email format';
+                showInputError(emailError, errorMsg);
+                break;
+              case 'auth/weak-password':
+                errorMsg = 'Password is too weak';
+                showInputError(passwordError, errorMsg);
+                break;
+              default:
+                errorMsg = error.message;
+                showStatus(errorMsg, 'error');
+            }
           });
       });
 
       // Show status message
       function showStatus(message, type) {
         statusMessage.textContent = message;
-        statusMessage.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
+        statusMessage.classList.remove('hidden', 'bg-green-500', 'bg-red-500', 'slide-out');
         
         if (type === 'success') {
           statusMessage.classList.add('bg-green-500');
@@ -221,11 +469,72 @@
           statusMessage.classList.add('bg-red-500');
         }
         
-        // Hide after 5 seconds
-        setTimeout(() => {
-          statusMessage.classList.add('hidden');
-        }, 5000);
+        // Auto hide after 5 seconds for errors
+        if (type === 'error') {
+          setTimeout(() => {
+            statusMessage.classList.add('slide-out');
+            setTimeout(() => {
+              statusMessage.classList.add('hidden');
+            }, 500);
+          }, 5000);
+        }
       }
+      
+      // Show input error
+      function showInputError(element, message) {
+        element.textContent = message;
+        element.classList.remove('hidden');
+        element.parentElement.querySelector('input')?.classList.add('form-input-error');
+      }
+      
+      // Clear specific error
+      function clearError(element) {
+        element.classList.add('hidden');
+        element.parentElement.querySelector('input')?.classList.remove('form-input-error');
+      }
+      
+      // Clear all errors
+      function clearAllErrors() {
+        const errorElements = [nameError, emailError, passwordError, confirmPasswordError, termsError];
+        errorElements.forEach(element => {
+          element.classList.add('hidden');
+        });
+        
+        const inputElements = [nameInput, emailInput, passwordInput, confirmPasswordInput];
+        inputElements.forEach(input => {
+          input.classList.remove('form-input-error');
+        });
+      }
+      
+      // Apply focused class for better visual feedback
+      const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
+      inputs.forEach(input => {
+        input.addEventListener('focus', () => {
+          input.classList.add('form-input-focus');
+        });
+        input.addEventListener('blur', () => {
+          input.classList.remove('form-input-focus');
+        });
+      });
+      
+      // Add responsive viewport info for debugging
+      function updateViewportInfo() {
+        const width = window.innerWidth;
+        let size = '';
+        
+        if (width < 640) size = 'xs';
+        else if (width < 768) size = 'sm';
+        else if (width < 1024) size = 'md';
+        else if (width < 1280) size = 'lg';
+        else size = 'xl';
+        
+        // You can use this for debugging if needed
+        console.log(`Current viewport: ${width}px (${size})`);
+      }
+      
+      // Initial check and listen for resize events
+      updateViewportInfo();
+      window.addEventListener('resize', updateViewportInfo);
     });
   </script>
 </body>
