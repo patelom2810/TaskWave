@@ -37,6 +37,15 @@
               900: '#064e3b',
               950: '#022c22',
             },
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
           }
         }
       }
@@ -45,42 +54,191 @@
   
   <!-- Custom CSS -->
   <style>
+    /* Wave background */
     .wave-bg {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230099ff' fill-opacity='0.1' d='M0,224L48,208C96,192,192,160,288,154.7C384,149,480,171,576,181.3C672,192,768,192,864,170.7C960,149,1056,107,1152,101.3C1248,96,1344,128,1392,144L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-size: 100% 100%;
+      background-size: cover;
+      background-position: center bottom;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Mobile menu */
+    .mobile-menu {
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .mobile-menu.active {
+      transform: translateX(0);
+    }
+
+    /* Card hover effects */
+    .feature-card {
+      transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      background-image: linear-gradient(to right, #2a9eff, #10b981);
+    }
+
+    /* FAQ accordion */
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .faq-item.active .faq-content {
+      max-height: 200px;
+    }
+    
+    .faq-toggle {
+      transition: transform 0.3s ease;
+    }
+    
+    .faq-item.active .faq-toggle {
+      transform: rotate(180deg);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #2a9eff;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #1466ff;
+    }
+
+    /* Button hover effects */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.1);
+      z-index: -2;
+    }
+    
+    .btn-primary:before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+      z-index: -1;
+    }
+    
+    .btn-primary:hover:before {
+      width: 100%;
+    }
+
+    /* Image shadow */
+    .img-shadow {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Testimonial card hover */
+    .testimonial-card {
+      transition: all 0.3s ease;
+    }
+    
+    .testimonial-card:hover {
+      transform: scale(1.02);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .wave-bg {
+        background-size: 200% 100%;
+      }
     }
   </style>
-  
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
   <div class="min-h-screen flex flex-col">
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" class="mobile-menu fixed top-0 right-0 h-full w-full md:w-64 bg-white z-50 shadow-2xl p-6 flex flex-col">
+      <div class="flex justify-between items-center mb-8">
+        <div class="text-2xl font-bold">🌊 <span class="gradient-text">TaskWave</span></div>
+        <button id="closeMenu" class="text-gray-500 hover:text-gray-800">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <nav class="flex flex-col space-y-4">
+        <a href="#features" class="px-4 py-2 text-primary-700 hover:bg-primary-50 rounded-lg transition-colors">Features</a>
+        <a href="#testimonials" class="px-4 py-2 text-primary-700 hover:bg-primary-50 rounded-lg transition-colors">Testimonials</a>
+        <a href="#faq" class="px-4 py-2 text-primary-700 hover:bg-primary-50 rounded-lg transition-colors">FAQ</a>
+        <a href="login.html" class="px-4 py-2 text-primary-700 hover:bg-primary-50 rounded-lg transition-colors">Login</a>
+        <a href="register.html" class="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-center">Register</a>
+      </nav>
+    </div>
+
     <!-- Hero Section -->
-    <div class="wave-bg min-h-[60vh] flex flex-col">
+    <div class="wave-bg min-h-[80vh] flex flex-col">
       <header class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center">
-          <div class="text-3xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></div>
+          <div class="text-3xl font-bold">🌊 <span class="gradient-text">TaskWave</span></div>
         </div>
-        <nav>
-          <a href="login.html" class="px-5 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">Login</a>
+        <nav class="hidden md:flex items-center space-x-2">
+          <a href="#features" class="px-4 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">Features</a>
+          <a href="#testimonials" class="px-4 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">Testimonials</a>
+          <a href="#faq" class="px-4 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">FAQ</a>
+          <a href="login.html" class="px-4 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">Login</a>
           <a href="register.html" class="px-5 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Register</a>
         </nav>
+        <button id="menuToggle" class="md:hidden text-primary-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </header>
       
-      <div class="container mx-auto px-4 flex-grow flex flex-col md:flex-row items-center justify-center gap-12">
+      <div class="container mx-auto px-4 flex-grow flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 py-8 md:py-0">
         <div class="max-w-lg">
-          <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-            Ride the wave of <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">productivity</span>
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+            Ride the wave of <span class="gradient-text">productivity</span>
           </h1>
           <p class="text-lg text-gray-700 mb-8">
             TaskWave helps teams collaborate effortlessly with real-time task management. Create, assign, and track tasks with the people who matter most.
           </p>
           <div class="flex flex-wrap gap-4">
-            <a href="register.html" class="px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
+            <a href="register.html" class="btn-primary px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
               Get Started Free
             </a>
             <a href="#features" class="px-6 py-3 bg-white text-primary-700 border border-primary-200 rounded-lg hover:bg-gray-50 transition-all">
@@ -88,8 +246,8 @@
             </a>
           </div>
         </div>
-        <div class="max-w-md">
-          <img src="/api/placeholder/500/400" alt="TaskWave Application" class="rounded-lg shadow-2xl">
+        <div class="max-w-md animate-float">
+          <img src="main.png" alt="TaskWave Application" class="rounded-lg shadow-2xl img-shadow">
         </div>
       </div>
     </div>
@@ -97,101 +255,341 @@
     <!-- Features Section -->
     <section id="features" class="py-16 bg-white">
       <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center mb-12">Why TaskWave?</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">Why TaskWave?</h2>
+        <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">Powerful features designed to streamline your workflow and boost productivity.</p>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="feature-card p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white">
             <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
             <h3 class="text-xl font-semibold mb-2">Effortless Collaboration</h3>
-            <p class="text-gray-600">Share tasks with team members by email and keep everyone in sync with real-time updates.</p>
+            <p class="text-gray-600">Share tasks with team members by email and keep everyone in sync with real-time updates. Perfect for remote teams.</p>
           </div>
           
-          <div class="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white">
+          <div class="feature-card p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white">
             <div class="w-12 h-12 flex items-center justify-center rounded-full bg-secondary-100 text-secondary-600 mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <h3 class="text-xl font-semibold mb-2">Real-Time Updates</h3>
-            <p class="text-gray-600">Changes sync instantly across all devices, so your team is always working with the latest information.</p>
+            <p class="text-gray-600">Changes sync instantly across all devices, so your team is always working with the latest information. No more outdated tasks.</p>
           </div>
           
-          <div class="p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white">
+          <div class="feature-card p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white">
             <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
             <h3 class="text-xl font-semibold mb-2">Secure & Reliable</h3>
-            <p class="text-gray-600">Your data is protected with industry-standard security. Login with email and password for secure access.</p>
+            <p class="text-gray-600">Your data is protected with industry-standard security. Login with email and password for secure access to your projects.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">What Our Users Say</h2>
+        <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">Join thousands of satisfied users who have transformed their workflow with TaskWave.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="testimonial-card bg-white p-6 rounded-xl shadow">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">JD</div>
+              <div class="ml-4">
+                <h4 class="font-semibold">John Doe</h4>
+                <p class="text-sm text-gray-500">Project Manager</p>
+              </div>
+            </div>
+            <div class="mb-3 text-yellow-400 flex">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+            <p class="text-gray-600">"TaskWave has transformed how our team manages projects. The real-time updates are a game-changer for remote collaboration."</p>
+          </div>
+          
+          <div class="testimonial-card bg-white p-6 rounded-xl shadow">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center text-secondary-700 font-bold">AS</div>
+              <div class="ml-4">
+                <h4 class="font-semibold">Amanda Smith</h4>
+                <p class="text-sm text-gray-500">Team Lead</p>
+              </div>
+            </div>
+            <div class="mb-3 text-yellow-400 flex">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+            <p class="text-gray-600">"The intuitive interface makes task management effortless. Our productivity has increased by 30% since we started using TaskWave."</p>
+          </div>
+          
+          <div class="testimonial-card bg-white p-6 rounded-xl shadow">
+            <div class="flex items-center mb-4">
+              <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">RJ</div>
+              <div class="ml-4">
+                <h4 class="font-semibold">Robert Johnson</h4>
+                <p class="text-sm text-gray-500">Freelancer</p>
+              </div>
+            </div>
+            <div class="mb-3 text-yellow-400 flex">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+            <p class="text-gray-600">"As a freelancer juggling multiple clients, TaskWave keeps me organized and on track. I wouldn't be able to manage my workload without it."</p>
           </div>
         </div>
       </div>
     </section>
     
     <!-- CTA Section -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-16 bg-gradient-to-r from-primary-500 to-secondary-500 text-white">
       <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-6">Ready to boost your productivity?</h2>
-        <p class="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to boost your productivity?</h2>
+        <p class="text-lg mb-8 max-w-2xl mx-auto">
           Join thousands of teams who use TaskWave to stay organized and collaborate effectively.
         </p>
-        <a href="register.html" class="px-8 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg hover:opacity-90 transition-all shadow-lg">
+        <a href="register.html" class="px-8 py-3 bg-white text-primary-600 font-medium rounded-lg hover:bg-gray-100 transition-all shadow-lg">
           Create Free Account
         </a>
+      </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section id="faq" class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">Frequently Asked Questions</h2>
+        <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">Find answers to common questions about TaskWave.</p>
+        
+        <div class="max-w-3xl mx-auto space-y-6">
+          <div class="faq-item border border-gray-200 rounded-lg overflow-hidden">
+            <button class="faq-button w-full flex justify-between items-center p-6 focus:outline-none">
+              <h3 class="text-xl font-semibold text-left">Is TaskWave free to use?</h3>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 faq-toggle text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="faq-content px-6 pb-6">
+              <p class="text-gray-600">Yes, TaskWave offers a free tier with essential features for individuals and small teams. We also offer premium plans with advanced features for growing organizations.</p>
+            </div>
+          </div>
+          
+          <div class="faq-item border border-gray-200 rounded-lg overflow-hidden">
+            <button class="faq-button w-full flex justify-between items-center p-6 focus:outline-none">
+              <h3 class="text-xl font-semibold text-left">How secure is my data?</h3>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 faq-toggle text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="faq-content px-6 pb-6">
+              <p class="text-gray-600">We take security seriously. All data is encrypted both in transit and at rest. We use industry-standard authentication methods and regular security audits.</p>
+            </div>
+          </div>
+          
+          <div class="faq-item border border-gray-200 rounded-lg overflow-hidden">
+            <button class="faq-button w-full flex justify-between items-center p-6 focus:outline-none">
+              <h3 class="text-xl font-semibold text-left">Can I invite team members to collaborate?</h3>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 faq-toggle text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="faq-content px-6 pb-6">
+              <p class="text-gray-600">You can invite unlimited team members to collaborate on tasks. Simply share the project link or send invitations via email.</p>
+            </div>
+          </div>
+          
+          <div class="faq-item border border-gray-200 rounded-lg overflow-hidden">
+            <button class="faq-button w-full flex justify-between items-center p-6 focus:outline-none">
+              <h3 class="text-xl font-semibold text-left">Is there a mobile app available?</h3>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 faq-toggle text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="faq-content px-6 pb-6">
+              <p class="text-gray-600">Yes, TaskWave is available on iOS and Android, allowing you to manage tasks on the go. Our responsive web app also works great on mobile browsers.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
     
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-400 py-12">
       <div class="container mx-auto px-4">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-          <div class="mb-6 md:mb-0">
-            <div class="text-2xl font-bold text-white">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-secondary-400">TaskWave</span></div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div class="col-span-1 md:col-span-1">
+            <div class="text-2xl font-bold text-white">🌊 <span class="gradient-text">TaskWave</span></div>
             <p class="mt-2">Simple, powerful task management</p>
+            <div class="mt-4 flex space-x-4">
+              <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd"></path>
+                </svg>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                </svg>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd"></path>
+                </svg>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                </svg>
+              </a>
+            </div>
           </div>
           
-          <div class="flex flex-wrap gap-8">
-            <div>
-              <h4 class="text-white font-medium mb-3">Product</h4>
-              <ul class="space-y-2">
-                <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 class="text-white font-medium mb-3">Company</h4>
-              <ul class="space-y-2">
-                <li><a href="#" class="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 class="text-white font-medium mb-3">Legal</h4>
-              <ul class="space-y-2">
-                <li><a href="#" class="hover:text-white transition-colors">Privacy</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Terms</a></li>
-              </ul>
-            </div>
+          <div>
+            <h4 class="text-white font-medium mb-3">Product</h4>
+            <ul class="space-y-2">
+              <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">Support</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-white font-medium mb-3">Company</h4>
+            <ul class="space-y-2">
+              <li><a href="#" class="hover:text-white transition-colors">About</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="text-white font-medium mb-3">Legal</h4>
+            <ul class="space-y-2">
+              <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="#" class="hover:text-white transition-colors">Cookie Policy</a></li>
+            </ul>
           </div>
         </div>
         
         <div class="border-t border-gray-800 mt-12 pt-8 text-center">
           <p>&copy; 2025 TaskWave. All rights reserved.</p>
+          <p class="mt-2">Created with ❤️ by Om Patel</p>
+          <p class="mt-1"><a href="mailto:omashwin28@gmail.com" class="hover:text-white transition-colors">omashwin28@gmail.com</a></p>
         </div>
       </div>
     </footer>
   </div>
 
   <!-- Firebase Configuration -->
-  <script src="js/firebase-config.js"></script>
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAOkalLzSTlGsH8j6G_vxz9zzX3GOq-eas",
+  authDomain: "col-todo.firebaseapp.com",
+  projectId: "col-todo",
+  storageBucket: "col-todo.firebasestorage.app",
+  messagingSenderId: "324403283385",
+  appId: "1:324403283385:web:dfe1bb0c8384efa28d6268",
+  measurementId: "G-9B5FM0YF9Y"
+    };
+    
+    // Initialize Firebase
+    if (typeof firebase !== 'undefined') {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    // Mobile menu functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.getElementById('menuToggle');
+      const closeMenu = document.getElementById('closeMenu');
+      const mobileMenu = document.getElementById('mobileMenu');
+      
+      if (menuToggle && closeMenu && mobileMenu) {
+        menuToggle.addEventListener('click', function() {
+          mobileMenu.classList.add('active');
+        });
+        
+        closeMenu.addEventListener('click', function() {
+          mobileMenu.classList.remove('active');
+        });
+      }
+      
+      // FAQ accordion functionality
+      const faqButtons = document.querySelectorAll('.faq-button');
+      
+      faqButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const faqItem = button.parentElement;
+          faqItem.classList.toggle('active');
+        });
+      });
+      
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+            
+            // Close mobile menu if open
+            mobileMenu.classList.remove('active');
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
