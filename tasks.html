@@ -120,6 +120,55 @@
         display: block;
       }
     }
+
+    /* Responsive table styles */
+    @media (max-width: 767px) {
+      .responsive-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .responsive-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      .task-actions {
+        opacity: 1;
+      }
+    }
+
+    /* Line clamp for descriptions */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Improved board view for mobile */
+    @media (max-width: 767px) {
+      .board-columns {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      
+      .board-column {
+        min-height: 300px;
+      }
+    }
+
+    /* Fix for task modal on small screens */
+    @media (max-width: 480px) {
+      .task-modal-content {
+        width: 95%;
+        max-width: 100%;
+      }
+    }
   </style>
   
   <!-- Firebase SDK -->
@@ -147,7 +196,7 @@
           <div class="flex-shrink-0 flex items-center">
             <a href="dashboard.html" class="text-2xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></a>
           </div>
-          <nav class="ml-6 flex space-x-8">
+          <nav class="ml-6 hidden md:flex space-x-8">
             <a href="dashboard.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
               Dashboard
             </a>
@@ -158,6 +207,15 @@
               Team
             </a>
           </nav>
+        </div>
+        <!-- Mobile Navigation -->
+        <div class="flex md:hidden items-center">
+          <button id="mobileMenuBtn" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500">
+            <span class="sr-only">Open menu</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
         </div>
         <div class="flex items-center">
           <div class="ml-4 flex items-center md:ml-6">
@@ -227,6 +285,21 @@
         </div>
       </div>
     </div>
+    
+    <!-- Mobile menu, show/hide based on menu state -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a href="dashboard.html" class="text-gray-500 block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-50">
+          Dashboard
+        </a>
+        <a href="tasks.html" class="bg-primary-50 text-primary-700 block px-3 py-2 rounded-md text-base font-medium">
+          Tasks
+        </a>
+        <a href="team.html" class="text-gray-500 block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-50">
+          Team
+        </a>
+      </div>
+    </div>
   </header>
 
   <!-- Main Content -->
@@ -254,28 +327,28 @@
     </div>
 
     <!-- Task Filters -->
-    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-6 overflow-x-auto">
       <div class="flex flex-wrap gap-4 items-center">
-        <div>
+        <div class="w-full sm:w-auto">
           <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select id="statusFilter" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+          <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
             <option value="all">All</option>
             <option value="completed">Completed</option>
             <option value="pending">Pending</option>
           </select>
         </div>
-        <div>
+        <div class="w-full sm:w-auto">
           <label for="priorityFilter" class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-          <select id="priorityFilter" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+          <select id="priorityFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
             <option value="all">All</option>
             <option value="high">High</option>
             <option value="medium">Medium</option>
             <option value="low">Low</option>
           </select>
         </div>
-        <div>
+        <div class="w-full sm:w-auto">
           <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-          <select id="sortBy" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+          <select id="sortBy" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="dueDate">Due Date</option>
@@ -283,7 +356,7 @@
             <option value="title">Title</option>
           </select>
         </div>
-        <div class="ml-auto">
+        <div class="ml-auto mt-4 sm:mt-0">
           <label for="viewMode" class="block text-sm font-medium text-gray-700 mb-1">View</label>
           <div class="flex border border-gray-300 rounded-md overflow-hidden">
             <button id="listViewBtn" class="px-3 py-2 bg-primary-50 text-primary-700 border-r border-gray-300 focus:outline-none">
@@ -303,23 +376,25 @@
 
     <!-- List View -->
     <div id="listView" class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="tasksList" class="bg-white divide-y divide-gray-200">
-          <!-- Will be populated dynamically -->
-          <tr>
-            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Loading tasks...</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="responsive-table">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tasksList" class="bg-white divide-y divide-gray-200">
+            <!-- Will be populated dynamically -->
+            <tr>
+              <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Loading tasks...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div id="emptyTasksMessage" class="hidden py-12 text-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -338,9 +413,9 @@
     </div>
 
     <!-- Board View -->
-    <div id="boardView" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div id="boardView" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 board-columns">
       <!-- To Do Column -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden board-column">
         <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
           <h3 class="text-sm font-medium text-gray-700 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -357,7 +432,7 @@
       </div>
 
       <!-- In Progress Column -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden board-column">
         <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
           <h3 class="text-sm font-medium text-gray-700 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -374,7 +449,7 @@
       </div>
 
       <!-- Completed Column -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="bg-white rounded-lg shadow-sm overflow-hidden board-column">
         <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
           <h3 class="text-sm font-medium text-gray-700 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -393,7 +468,7 @@
   </main>
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
+  <div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center z-50">
     <div id="toastIcon" class="mr-2"></div>
     <div id="toastMessage"></div>
     <button id="toastClose" class="ml-4 text-gray-400 hover:text-gray-600">
@@ -403,14 +478,9 @@
     </button>
   </div>
 
-  <!-- Task Modal -->  d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-  </div>
-
   <!-- Task Modal -->
   <div id="taskModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden task-modal-content">
       <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-4 py-3 text-white flex justify-between items-center">
         <h3 id="modalTitle" class="text-lg font-medium">Add New Task</h3>
         <button id="closeTaskModal" class="text-white hover:text-gray-200">
@@ -429,7 +499,7 @@
           <label for="taskDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
           <textarea id="taskDescription" name="taskDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label for="taskPriority" class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
             <select id="taskPriority" name="taskPriority" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
@@ -451,7 +521,7 @@
             <option value="completed">Completed</option>
           </select>
         </div>
-        <div class="pt-4 flex justify-end space-x-3">
+        <div class="pt-4 flex flex-wrap justify-end gap-3">
           <button type="button" id="deleteTaskBtn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors hidden">
             Delete
           </button>
@@ -468,7 +538,7 @@
 
   <!-- Share Task Modal -->
   <div id="shareTaskModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden task-modal-content">
       <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-4 py-3 text-white flex justify-between items-center">
         <h3 class="text-lg font-medium">Share Task</h3>
         <button id="closeShareModal" class="text-white hover:text-gray-200">
@@ -522,6 +592,8 @@
       const headerProfileImage = document.getElementById('headerProfileImage');
       const logoutBtn = document.getElementById('logoutBtn');
       const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const mobileMenu = document.getElementById('mobileMenu');
       const tasksList = document.getElementById('tasksList');
       const emptyTasksMessage = document.getElementById('emptyTasksMessage');
       const todoTasks = document.getElementById('todoTasks');
@@ -570,6 +642,11 @@
       let allTasks = [];
       let currentView = 'list';
       
+      // Mobile menu toggle
+      mobileMenuBtn.addEventListener('click', function() {
+        mobileMenu.classList.toggle('hidden');
+      });
+      
       // FIXED: Improved profile dropdown toggle functionality
       profileButton.addEventListener('click', function(e) {
         e.stopPropagation(); // Prevent event from bubbling up
@@ -587,6 +664,11 @@
         if (!profileButton.contains(event.target) && !profileDropdown.contains(event.target)) {
           profileDropdown.classList.remove('show');
         }
+        
+        // Also close mobile menu when clicking outside
+        if (mobileMenu && !mobileMenu.classList.contains('hidden') && !mobileMenuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+          mobileMenu.classList.add('hidden');
+        }
       });
       
       // Handle window resize for profile dropdown
@@ -594,6 +676,11 @@
         if (window.innerWidth >= 768) {
           // On desktop, reset to CSS hover behavior
           profileDropdown.classList.remove('show');
+          
+          // Also hide mobile menu
+          if (mobileMenu) {
+            mobileMenu.classList.add('hidden');
+          }
         }
       });
       
@@ -651,6 +738,10 @@
           taskId.value = '';
           deleteTaskBtn.classList.add('hidden');
           shareTaskBtn.classList.add('hidden');
+          
+          // Set default date to today
+          const today = new Date().toISOString().split('T')[0];
+          taskDueDate.value = today;
         } else if (mode === 'edit' && taskData) {
           modalTitle.textContent = 'Edit Task';
           taskId.value = taskData.id;
@@ -1501,6 +1592,73 @@
       toastClose.addEventListener('click', function() {
         toast.classList.add('translate-y-20', 'opacity-0');
       });
+      
+      // Handle touch events for drag and drop on mobile
+      if ('ontouchstart' in window) {
+        let touchTask = null;
+        
+        document.querySelectorAll('#todoTasks, #inProgressTasks, #completedTasks').forEach(column => {
+          column.addEventListener('touchstart', function(e) {
+            if (e.target.closest('.task-item')) {
+              touchTask = e.target.closest('.task-item');
+              touchTask.classList.add('dragging');
+            }
+          });
+          
+          column.addEventListener('touchend', function(e) {
+            if (touchTask) {
+              const taskId = touchTask.dataset.taskId;
+              const columnId = this.id;
+              let status = 'todo';
+              
+              if (columnId === 'inProgressTasks') {
+                status = 'inProgress';
+              } else if (columnId === 'completedTasks') {
+                status = 'completed';
+              }
+              
+              // Update task status if dropped in a different column
+              const task = allTasks.find(t => t.id === taskId);
+              if (task && ((task.completed && status !== 'completed') || 
+                  (!task.completed && task.status !== status))) {
+                toggleTaskStatus(taskId, status);
+              }
+              
+              touchTask.classList.remove('dragging');
+              touchTask = null;
+            }
+          });
+        });
+      }
+      
+      // Toggle task status (for mobile drag and drop)
+      function toggleTaskStatus(taskId, status) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const updates = {
+          status: status,
+          completed: status === 'completed',
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        if (status === 'completed') {
+          updates.completedAt = firebase.database.ServerValue.TIMESTAMP;
+        }
+        
+        database.ref(`tasks/${user.uid}/${taskId}`).update(updates)
+          .then(() => {
+            showToast(`Task moved to ${status.replace(/([A-Z])/g, ' $1').toLowerCase()}`, 'success');
+          })
+          .catch(error => {
+            console.error('Error updating task:', error);
+            showToast('Error updating task', 'error');
+          });
+      }
+      
+      // Initialize with default date in add task modal
+      const today = new Date().toISOString().split('T')[0];
+      taskDueDate.value = today;
     });
   </script>
 </body>
