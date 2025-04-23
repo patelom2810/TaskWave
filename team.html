@@ -67,6 +67,36 @@
       opacity: 0;
       transition: opacity 0.2s ease-in-out;
     }
+
+    .profile-dropdown {
+      display: none;
+      transition: all 0.3s ease;
+    }
+
+    .profile-dropdown.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .toast {
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .mobile-menu {
+      transition: all 0.3s ease;
+    }
   </style>
   
   <!-- Firebase SDK -->
@@ -106,32 +136,150 @@
           </nav>
         </div>
         <div class="flex items-center">
+          <!-- Mobile menu button -->
+          <button type="button" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 mobile-menu-button">
+            <span class="sr-only">Open main menu</span>
+            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+        <div class="flex items-center">
           <div class="ml-4 flex items-center md:ml-6">
             <!-- Notification Bell -->
-            <button class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative">
+            <button class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative" id="notificationButton">
               <span class="sr-only">View notifications</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
-              <span id="notificationBadge" class="hidden absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+              <span id="notificationBadge" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
             </button>
+
+            <!-- Notification Dropdown -->
+            <div id="notificationDropdown" class="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-20 hidden" style="top: 4rem;">
+              <div class="px-4 py-3 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Notifications</h3>
+                <p class="mt-1 text-sm text-gray-500">You have 3 unread notifications</p>
+              </div>
+              <div class="max-h-60 overflow-y-auto">
+                <div class="px-4 py-3 hover:bg-gray-50 border-b">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                      <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-semibold">
+                        JD
+                      </div>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <p class="text-sm font-medium text-gray-900">John Doe accepted your invitation</p>
+                      <p class="text-xs text-gray-500 mt-1">5 minutes ago</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="px-4 py-3 hover:bg-gray-50 border-b">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                      <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-semibold">
+                        AS
+                      </div>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <p class="text-sm font-medium text-gray-900">Anna Smith shared a task with you</p>
+                      <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="px-4 py-3 hover:bg-gray-50">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                      <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-semibold">
+                        TW
+                      </div>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <p class="text-sm font-medium text-gray-900">TaskWave update available</p>
+                      <p class="text-xs text-gray-500 mt-1">1 day ago</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="px-4 py-3 bg-gray-50 text-center border-t border-gray-200">
+                <a href="#" class="text-sm font-medium text-primary-600 hover:text-primary-500">View all notifications</a>
+              </div>
+            </div>
 
             <!-- Profile dropdown -->
             <div class="ml-3 relative group">
               <div class="flex items-center gap-2">
-                <span id="userDisplayName" class="text-sm font-medium text-gray-700">Loading...</span>
-                <div class="flex rounded-full bg-gray-100 text-sm focus:outline-none">
-                  <span class="inline-block h-8 w-8 rounded-full overflow-hidden bg-gray-200">
-                    <svg class="h-full w-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                <span id="userDisplayName" class="text-sm font-medium text-gray-700 hidden md:block">Loading...</span>
+                <div id="profileButton" class="flex rounded-full bg-gray-100 text-sm focus:outline-none cursor-pointer profile-image">
+                  <span id="profileImageContainer" class="inline-block h-8 w-8 rounded-full overflow-hidden bg-gray-200">
+                    <svg id="defaultProfileImage" class="h-full w-full text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
+                    <img id="headerProfileImage" class="h-full w-full object-cover hidden" src="/placeholder.svg" alt="Profile picture">
                   </span>
                 </div>
-                <button id="logoutBtn" class="text-sm text-gray-500 hover:text-red-500 transition-colors">Logout</button>
+                <button id="logoutBtn" class="text-sm text-gray-500 hover:text-red-500 transition-colors hidden md:block">Logout</button>
+              </div>
+              
+              <!-- Profile dropdown menu -->
+              <div id="profileDropdown" class="profile-dropdown absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+                <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    View Profile
+                  </div>
+                </a>
+                <a href="profile.html#security" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Security Settings
+                  </div>
+                </a>
+                <a href="profile.html#preferences" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Preferences
+                  </div>
+                </a>
+                <div class="border-t border-gray-100 my-1"></div>
+                <button id="mobileLogoutBtn" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                  <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                  </div>
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    
+    <!-- Mobile menu, show/hide based on menu state -->
+    <div class="md:hidden mobile-menu hidden" id="mobileMenu">
+      <div class="pt-2 pb-3 space-y-1">
+        <a href="dashboard.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+          Dashboard
+        </a>
+        <a href="tasks.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+          Tasks
+        </a>
+        <a href="team.html" class="bg-primary-50 border-primary-500 text-primary-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+          Team
+        </a>
+        <a href="profile.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+          Profile
+        </a>
       </div>
     </div>
   </header>
@@ -329,7 +477,7 @@
           <textarea id="inviteMessage" name="inviteMessage" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Add a personal message"></textarea>
         </div>
         <div class="pt-4">
-          <button type="submit" class="w-full px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
+          <button type="submit" id="sendInviteBtn" class="w-full px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-md hover:opacity-90 transition-opacity flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -412,6 +560,7 @@
       // Elements
       const userDisplayName = document.getElementById('userDisplayName');
       const logoutBtn = document.getElementById('logoutBtn');
+      const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
       const sharedWithMeTab = document.getElementById('sharedWithMeTab');
       const sharedByMeTab = document.getElementById('sharedByMeTab');
       const teamMembersTab = document.getElementById('teamMembersTab');
@@ -432,6 +581,7 @@
       const inviteForm = document.getElementById('inviteForm');
       const inviteEmail = document.getElementById('inviteEmail');
       const inviteMessage = document.getElementById('inviteMessage');
+      const sendInviteBtn = document.getElementById('sendInviteBtn');
       const taskDetailsModal = document.getElementById('taskDetailsModal');
       const closeTaskDetailsModal = document.getElementById('closeTaskDetailsModal');
       const taskDetailsTitle = document.getElementById('taskDetailsTitle');
@@ -453,6 +603,13 @@
       const toastMessage = document.getElementById('toastMessage');
       const toastIcon = document.getElementById('toastIcon');
       const toastClose = document.getElementById('toastClose');
+      const profileButton = document.getElementById('profileButton');
+      const profileDropdown = document.getElementById('profileDropdown');
+      const mobileMenuButton = document.querySelector('.mobile-menu-button');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const notificationButton = document.getElementById('notificationButton');
+      const notificationDropdown = document.getElementById('notificationDropdown');
+      const notificationBadge = document.getElementById('notificationBadge');
       
       // Global variables
       let currentTaskId = null;
@@ -485,8 +642,53 @@
         }, 1000);
       });
       
+      // Profile dropdown toggle
+      profileButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        profileDropdown.classList.toggle('active');
+      });
+
+      // Close profile dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!profileButton.contains(e.target) && !profileDropdown.contains(e.target)) {
+          profileDropdown.classList.remove('active');
+        }
+      });
+
+      // Notification dropdown toggle
+      notificationButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notificationDropdown.classList.toggle('hidden');
+        // Mark as read when opened
+        if (!notificationDropdown.classList.contains('hidden')) {
+          notificationBadge.classList.add('hidden');
+        }
+      });
+
+      // Close notification dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!notificationButton.contains(e.target) && !notificationDropdown.contains(e.target)) {
+          notificationDropdown.classList.add('hidden');
+        }
+      });
+
+      // Mobile menu toggle
+      mobileMenuButton.addEventListener('click', function() {
+        mobileMenu.classList.toggle('hidden');
+      });
+      
       // Logout
       logoutBtn.addEventListener('click', function() {
+        auth.signOut().then(() => {
+          window.location.href = 'login.html';
+        }).catch(error => {
+          console.error('Error signing out:', error);
+          showToast('Error signing out: ' + error.message, 'error');
+        });
+      });
+
+      // Mobile logout
+      mobileLogoutBtn.addEventListener('click', function() {
         auth.signOut().then(() => {
           window.location.href = 'login.html';
         }).catch(error => {
@@ -567,51 +769,65 @@
           showToast('Please enter an email address', 'error');
           return;
         }
+
+        // Disable button and show loading state
+        sendInviteBtn.disabled = true;
+        sendInviteBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Sending...
+        `;
         
         // Find user by email
-        database.ref('users').orderByChild('email').equalTo(email).once('value')
-          .then(snapshot => {
-            if (snapshot.exists()) {
-              // User found
-              let recipientId = null;
-              let recipientData = null;
-              
-              snapshot.forEach(childSnapshot => {
-                recipientId = childSnapshot.key;
-                recipientData = childSnapshot.val();
-              });
-              
-              if (recipientId) {
-                // Check if already a team member
-                return database.ref(`teamMembers/${user.uid}/${recipientId}`).once('value')
-                  .then(teamSnapshot => {
-                    if (teamSnapshot.exists()) {
-                      throw new Error('This user is already a team member');
-                    }
-                    
-                    // Add to team members
-                    return database.ref(`teamMembers/${user.uid}/${recipientId}`).set({
-                      name: recipientData.name,
-                      email: recipientData.email,
-                      message: message,
-                      createdAt: firebase.database.ServerValue.TIMESTAMP
-                    });
-                  });
-              } else {
-                throw new Error('Recipient not found');
-              }
-            } else {
-              throw new Error('User with this email not found');
+        checkUserExists(email)
+          .then(userExists => {
+            if (!userExists) {
+              throw new Error('User with this email not found in our system');
             }
+            
+            // Check if already a team member
+            return database.ref(`teamMembers/${user.uid}/${email.replace(/[.#$\/[\]]/g, '_')}`).once('value')
+              .then(teamSnapshot => {
+                if (teamSnapshot.exists()) {
+                  throw new Error('This user is already a team member');
+                }
+                
+                // Send invitation email
+                return sendInvitationEmail(email, message);
+              });
+          })
+          .then(() => {
+            // Add to team members
+            return database.ref(`teamMembers/${user.uid}/${email.replace(/[.#$\/[\]]/g, '_')}`).set({
+              email: email,
+              message: message,
+              status: 'pending',
+              createdAt: firebase.database.ServerValue.TIMESTAMP
+            });
           })
           .then(() => {
             inviteModal.classList.add('hidden');
             inviteForm.reset();
-            showToast('Team member invited successfully', 'success');
+            showToast('Team invitation sent successfully', 'success');
+            
+            // Reload team members
+            loadTeamMembers(user.uid);
           })
           .catch(error => {
             console.error('Error inviting team member:', error);
             showToast(error.message, 'error');
+          })
+          .finally(() => {
+            // Reset button state
+            sendInviteBtn.disabled = false;
+            sendInviteBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Send Invitation
+            `;
           });
       });
       
@@ -690,6 +906,28 @@
           .catch(error => {
             console.error('Error loading user data:', error);
           });
+      }
+      
+      // Check if user exists in database
+      function checkUserExists(email) {
+        // Simulate database check
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            // For demo purposes, 70% chance user exists
+            resolve(Math.random() > 0.3);
+          }, 1000);
+        });
+      }
+
+      // Send invitation email
+      function sendInvitationEmail(email, message) {
+        // Simulate sending email
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            // For demo purposes, 90% chance email sends successfully
+            resolve(Math.random() > 0.1);
+          }, 1500);
+        });
       }
       
       // Load shared with me tasks
@@ -972,25 +1210,30 @@
             day: 'numeric' 
           });
         }
+
+        // Get name from email if name not available
+        const name = member.name || member.email.split('@')[0];
+        const initial = name.charAt(0).toUpperCase();
         
         item.innerHTML = `
           <div class="flex items-center">
             <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
-              ${member.name ? member.name.charAt(0).toUpperCase() : '?'}
+              ${initial}
             </div>
             <div class="ml-4">
-              <div class="text-sm font-medium text-gray-900">${member.name || 'Unknown'}</div>
+              <div class="text-sm font-medium text-gray-900">${name}</div>
               <div class="text-xs text-gray-500">${member.email || ''}</div>
               <div class="text-xs text-gray-500 mt-1">Added on ${formattedDate}</div>
+              ${member.status === 'pending' ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">Pending</span>` : ''}
             </div>
           </div>
           <div class="flex items-center">
-            <button class="text-primary-600 hover:text-primary-900 p-1 mr-2" data-member-id="${member.id}" data-member-email="${member.email}">
+            <button class="text-primary-600 hover:text-primary-900 p-1 mr-2 share-task-btn" data-member-id="${member.id}" data-member-email="${member.email}">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
             </button>
-            <button class="text-red-600 hover:text-red-900 p-1" data-member-id="${member.id}">
+            <button class="text-red-600 hover:text-red-900 p-1 remove-member-btn" data-member-id="${member.id}">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
               </svg>
@@ -999,7 +1242,7 @@
         `;
         
         // Add event listeners
-        const shareBtn = item.querySelector('button[data-member-email]');
+        const shareBtn = item.querySelector('.share-task-btn');
         shareBtn.addEventListener('click', function() {
           // Redirect to tasks page with pre-filled share modal
           const email = this.dataset.memberEmail;
@@ -1007,7 +1250,7 @@
           window.location.href = 'tasks.html?share=true';
         });
         
-        const removeBtn = item.querySelector('button[data-member-id]');
+        const removeBtn = item.querySelector('.remove-member-btn');
         removeBtn.addEventListener('click', function() {
           if (confirm('Are you sure you want to remove this team member?')) {
             removeTeamMember(this.dataset.memberId);
@@ -1171,15 +1414,18 @@
         
         toast.classList.add('text-white');
         toast.classList.remove('translate-y-20', 'opacity-0');
+        toast.classList.add('active');
         
         // Auto hide after 3 seconds
         setTimeout(() => {
+          toast.classList.remove('active');
           toast.classList.add('translate-y-20', 'opacity-0');
         }, 3000);
       }
       
       // Close toast
       toastClose.addEventListener('click', function() {
+        toast.classList.remove('active');
         toast.classList.add('translate-y-20', 'opacity-0');
       });
     });
