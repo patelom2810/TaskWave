@@ -97,6 +97,39 @@
     .mobile-menu {
       transition: all 0.3s ease;
     }
+
+    @media (max-width: 640px) {
+      .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .card-view {
+        display: flex;
+        flex-direction: column;
+      }
+    }
+
+    .invitation-status {
+      transition: all 0.3s ease;
+    }
+
+    .invitation-status.accepted {
+      background-color: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid #10b981;
+    }
+
+    .invitation-status.declined {
+      background-color: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid #ef4444;
+    }
+
+    .invitation-status.pending {
+      background-color: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid #f59e0b;
+    }
   </style>
   
   <!-- Firebase SDK -->
@@ -123,7 +156,7 @@
           <div class="flex-shrink-0 flex items-center">
             <a href="dashboard.html" class="text-2xl font-bold">🌊 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-500">TaskWave</span></a>
           </div>
-          <nav class="ml-6 flex space-x-8">
+          <nav class="hidden md:ml-6 md:flex md:space-x-8">
             <a href="dashboard.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
               Dashboard
             </a>
@@ -146,67 +179,6 @@
         </div>
         <div class="flex items-center">
           <div class="ml-4 flex items-center md:ml-6">
-            <!-- Notification Bell -->
-            <button class="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 relative" id="notificationButton">
-              <span class="sr-only">View notifications</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              <span id="notificationBadge" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-            </button>
-
-            <!-- Notification Dropdown -->
-            <div id="notificationDropdown" class="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-20 hidden" style="top: 4rem;">
-              <div class="px-4 py-3 border-b border-gray-200">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Notifications</h3>
-                <p class="mt-1 text-sm text-gray-500">You have 3 unread notifications</p>
-              </div>
-              <div class="max-h-60 overflow-y-auto">
-                <div class="px-4 py-3 hover:bg-gray-50 border-b">
-                  <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                      <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-semibold">
-                        JD
-                      </div>
-                    </div>
-                    <div class="ml-3 flex-1">
-                      <p class="text-sm font-medium text-gray-900">John Doe accepted your invitation</p>
-                      <p class="text-xs text-gray-500 mt-1">5 minutes ago</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="px-4 py-3 hover:bg-gray-50 border-b">
-                  <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                      <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-semibold">
-                        AS
-                      </div>
-                    </div>
-                    <div class="ml-3 flex-1">
-                      <p class="text-sm font-medium text-gray-900">Anna Smith shared a task with you</p>
-                      <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="px-4 py-3 hover:bg-gray-50">
-                  <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                      <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-semibold">
-                        TW
-                      </div>
-                    </div>
-                    <div class="ml-3 flex-1">
-                      <p class="text-sm font-medium text-gray-900">TaskWave update available</p>
-                      <p class="text-xs text-gray-500 mt-1">1 day ago</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="px-4 py-3 bg-gray-50 text-center border-t border-gray-200">
-                <a href="#" class="text-sm font-medium text-primary-600 hover:text-primary-500">View all notifications</a>
-              </div>
-            </div>
-
             <!-- Profile dropdown -->
             <div class="ml-3 relative group">
               <div class="flex items-center gap-2">
@@ -304,7 +276,7 @@
 
     <!-- Team Tabs -->
     <div class="bg-white rounded-lg shadow-sm mb-6">
-      <div class="border-b border-gray-200">
+      <div class="border-b border-gray-200 overflow-x-auto">
         <nav class="flex -mb-px">
           <button id="sharedWithMeTab" class="text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
             Shared With Me
@@ -315,13 +287,16 @@
           <button id="teamMembersTab" class="text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
             Team Members
           </button>
+          <button id="invitationsTab" class="text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+            Invitations
+          </button>
         </nav>
       </div>
     </div>
 
     <!-- Shared With Me Content -->
     <div id="sharedWithMeContent" class="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="px-4 py-5 border-b border-gray-200 sm:px-6 flex justify-between items-center">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h3 class="text-lg leading-6 font-medium text-gray-900">Tasks Shared With Me</h3>
           <p class="mt-1 max-w-2xl text-sm text-gray-500">Tasks that others have shared with you</p>
@@ -335,7 +310,9 @@
           </select>
         </div>
       </div>
-      <div class="overflow-x-auto">
+      
+      <!-- Table view (for larger screens) -->
+      <div class="hidden md:block overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -347,7 +324,7 @@
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody id="sharedWithMeList" class="bg-white divide-y divide-gray-200">
+          <tbody id="sharedWithMeTable" class="bg-white divide-y divide-gray-200">
             <!-- Will be populated dynamically -->
             <tr>
               <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Loading shared tasks...</td>
@@ -355,6 +332,14 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Card view (for mobile) -->
+      <div class="md:hidden">
+        <ul id="sharedWithMeCards" class="divide-y divide-gray-200">
+          <li class="px-4 py-4 text-center text-sm text-gray-500">Loading shared tasks...</li>
+        </ul>
+      </div>
+      
       <div id="emptySharedWithMe" class="hidden py-12 text-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -366,7 +351,7 @@
 
     <!-- Shared By Me Content -->
     <div id="sharedByMeContent" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
-      <div class="px-4 py-5 border-b border-gray-200 sm:px-6 flex justify-between items-center">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h3 class="text-lg leading-6 font-medium text-gray-900">Tasks Shared By Me</h3>
           <p class="mt-1 max-w-2xl text-sm text-gray-500">Tasks that you have shared with others</p>
@@ -380,7 +365,9 @@
           </select>
         </div>
       </div>
-      <div class="overflow-x-auto">
+      
+      <!-- Table view (for larger screens) -->
+      <div class="hidden md:block overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
@@ -392,7 +379,7 @@
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody id="sharedByMeList" class="bg-white divide-y divide-gray-200">
+          <tbody id="sharedByMeTable" class="bg-white divide-y divide-gray-200">
             <!-- Will be populated dynamically -->
             <tr>
               <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Loading shared tasks...</td>
@@ -400,6 +387,14 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Card view (for mobile) -->
+      <div class="md:hidden">
+        <ul id="sharedByMeCards" class="divide-y divide-gray-200">
+          <li class="px-4 py-4 text-center text-sm text-gray-500">Loading shared tasks...</li>
+        </ul>
+      </div>
+      
       <div id="emptySharedByMe" class="hidden py-12 text-center">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -443,6 +438,64 @@
         </div>
       </div>
     </div>
+
+    <!-- Invitations Content -->
+    <div id="invitationsContent" class="hidden bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Invitations</h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage sent and received invitations</p>
+      </div>
+      
+      <!-- Tabs for Sent/Received Invitations -->
+      <div class="border-b border-gray-200">
+        <nav class="flex -mb-px px-4 sm:px-6">
+          <button id="receivedInvitationsTab" class="text-primary-600 border-primary-500 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm">
+            Received
+          </button>
+          <button id="sentInvitationsTab" class="text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm">
+            Sent
+          </button>
+        </nav>
+      </div>
+      
+      <!-- Received Invitations -->
+      <div id="receivedInvitationsContent">
+        <ul id="receivedInvitationsList" class="divide-y divide-gray-200">
+          <!-- Will be populated dynamically -->
+          <li class="px-6 py-4 text-center text-sm text-gray-500">Loading received invitations...</li>
+        </ul>
+        <div id="emptyReceivedInvitations" class="hidden py-12 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No invitations</h3>
+          <p class="mt-1 text-sm text-gray-500">You haven't received any invitations yet.</p>
+        </div>
+      </div>
+      
+      <!-- Sent Invitations -->
+      <div id="sentInvitationsContent" class="hidden">
+        <ul id="sentInvitationsList" class="divide-y divide-gray-200">
+          <!-- Will be populated dynamically -->
+          <li class="px-6 py-4 text-center text-sm text-gray-500">Loading sent invitations...</li>
+        </ul>
+        <div id="emptySentInvitations" class="hidden py-12 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No invitations</h3>
+          <p class="mt-1 text-sm text-gray-500">You haven't sent any invitations yet.</p>
+          <div class="mt-6">
+            <button id="emptySendInviteBtn" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-primary-500 to-secondary-500 hover:opacity-90 focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              Invite Team Member
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Toast Notification -->
@@ -471,6 +524,7 @@
         <div>
           <label for="inviteEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
           <input type="email" id="inviteEmail" name="inviteEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="Enter email address" required>
+          <div id="emailValidationMessage" class="mt-1 text-xs text-red-500 hidden"></div>
         </div>
         <div>
           <label for="inviteMessage" class="block text-sm font-medium text-gray-700 mb-1">Message (optional)</label>
@@ -549,6 +603,56 @@
     </div>
   </div>
 
+  <!-- Invitation Response Modal -->
+  <div id="invitationResponseModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+      <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-4 py-3 text-white flex justify-between items-center">
+        <h3 class="text-lg font-medium">Respond to Invitation</h3>
+        <button id="closeInvitationResponseModal" class="text-white hover:text-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="mb-6">
+          <div class="flex items-center mb-4">
+            <div class="flex-shrink-0 mr-3">
+              <div class="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center text-lg font-semibold" id="invitationUserInitial"></div>
+            </div>
+            <div>
+              <div id="invitationUserName" class="text-lg font-medium text-gray-900"></div>
+              <div id="invitationUserEmail" class="text-sm text-gray-500"></div>
+            </div>
+          </div>
+          <p class="text-gray-600 mb-4">
+            <span id="invitationUserNameText"></span> has invited you to join their team on TaskWave.
+          </p>
+          <div id="invitationMessage" class="bg-gray-50 p-3 rounded-md text-sm text-gray-600 mb-4 hidden">
+            <div class="font-medium mb-1">Message:</div>
+            <p id="invitationMessageText"></p>
+          </div>
+          <div class="text-sm text-gray-500 mb-4">
+            <div class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Received on <span id="invitationReceivedDate"></span></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button id="declineInvitationBtn" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+            Decline
+          </button>
+          <button id="acceptInvitationBtn" class="px-4 py-2 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-md hover:opacity-90 transition-opacity">
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase Configuration -->
   <script src="js/firebase-config.js"></script>
   
@@ -564,22 +668,36 @@
       const sharedWithMeTab = document.getElementById('sharedWithMeTab');
       const sharedByMeTab = document.getElementById('sharedByMeTab');
       const teamMembersTab = document.getElementById('teamMembersTab');
+      const invitationsTab = document.getElementById('invitationsTab');
       const sharedWithMeContent = document.getElementById('sharedWithMeContent');
       const sharedByMeContent = document.getElementById('sharedByMeContent');
       const teamMembersContent = document.getElementById('teamMembersContent');
-      const sharedWithMeList = document.getElementById('sharedWithMeList');
-      const sharedByMeList = document.getElementById('sharedByMeList');
+      const invitationsContent = document.getElementById('invitationsContent');
+      const receivedInvitationsTab = document.getElementById('receivedInvitationsTab');
+      const sentInvitationsTab = document.getElementById('sentInvitationsTab');
+      const receivedInvitationsContent = document.getElementById('receivedInvitationsContent');
+      const sentInvitationsContent = document.getElementById('sentInvitationsContent');
+      const sharedWithMeTable = document.getElementById('sharedWithMeTable');
+      const sharedWithMeCards = document.getElementById('sharedWithMeCards');
+      const sharedByMeTable = document.getElementById('sharedByMeTable');
+      const sharedByMeCards = document.getElementById('sharedByMeCards');
       const teamMembersList = document.getElementById('teamMembersList');
+      const receivedInvitationsList = document.getElementById('receivedInvitationsList');
+      const sentInvitationsList = document.getElementById('sentInvitationsList');
       const emptySharedWithMe = document.getElementById('emptySharedWithMe');
       const emptySharedByMe = document.getElementById('emptySharedByMe');
       const emptyTeamMembers = document.getElementById('emptyTeamMembers');
+      const emptyReceivedInvitations = document.getElementById('emptyReceivedInvitations');
+      const emptySentInvitations = document.getElementById('emptySentInvitations');
       const inviteTeamMemberBtn = document.getElementById('inviteTeamMemberBtn');
       const emptyInviteBtn = document.getElementById('emptyInviteBtn');
+      const emptySendInviteBtn = document.getElementById('emptySendInviteBtn');
       const emptyShareTaskBtn = document.getElementById('emptyShareTaskBtn');
       const inviteModal = document.getElementById('inviteModal');
       const closeInviteModal = document.getElementById('closeInviteModal');
       const inviteForm = document.getElementById('inviteForm');
       const inviteEmail = document.getElementById('inviteEmail');
+      const emailValidationMessage = document.getElementById('emailValidationMessage');
       const inviteMessage = document.getElementById('inviteMessage');
       const sendInviteBtn = document.getElementById('sendInviteBtn');
       const taskDetailsModal = document.getElementById('taskDetailsModal');
@@ -596,6 +714,17 @@
       const taskDetailsUserEmail = document.getElementById('taskDetailsUserEmail');
       const acceptTaskBtn = document.getElementById('acceptTaskBtn');
       const rejectTaskBtn = document.getElementById('rejectTaskBtn');
+      const invitationResponseModal = document.getElementById('invitationResponseModal');
+      const closeInvitationResponseModal = document.getElementById('closeInvitationResponseModal');
+      const invitationUserInitial = document.getElementById('invitationUserInitial');
+      const invitationUserName = document.getElementById('invitationUserName');
+      const invitationUserEmail = document.getElementById('invitationUserEmail');
+      const invitationUserNameText = document.getElementById('invitationUserNameText');
+      const invitationMessage = document.getElementById('invitationMessage');
+      const invitationMessageText = document.getElementById('invitationMessageText');
+      const invitationReceivedDate = document.getElementById('invitationReceivedDate');
+      const acceptInvitationBtn = document.getElementById('acceptInvitationBtn');
+      const declineInvitationBtn = document.getElementById('declineInvitationBtn');
       const sharedWithMeFilter = document.getElementById('sharedWithMeFilter');
       const sharedByMeFilter = document.getElementById('sharedByMeFilter');
       const loadingOverlay = document.getElementById('loadingOverlay');
@@ -607,13 +736,13 @@
       const profileDropdown = document.getElementById('profileDropdown');
       const mobileMenuButton = document.querySelector('.mobile-menu-button');
       const mobileMenu = document.getElementById('mobileMenu');
-      const notificationButton = document.getElementById('notificationButton');
-      const notificationDropdown = document.getElementById('notificationDropdown');
-      const notificationBadge = document.getElementById('notificationBadge');
       
       // Global variables
       let currentTaskId = null;
       let currentTaskData = null;
+      let currentInvitationId = null;
+      let currentInvitationData = null;
+      let cachedUsers = {}; // Cache for user data to reduce database queries
       
       // Auth state change listener
       auth.onAuthStateChanged(function(user) {
@@ -632,6 +761,10 @@
         
         // Load team members
         loadTeamMembers(user.uid);
+        
+        // Load invitations
+        loadReceivedInvitations(user.uid);
+        loadSentInvitations(user.uid);
         
         // Hide loading overlay
         setTimeout(() => {
@@ -652,23 +785,6 @@
       document.addEventListener('click', function(e) {
         if (!profileButton.contains(e.target) && !profileDropdown.contains(e.target)) {
           profileDropdown.classList.remove('active');
-        }
-      });
-
-      // Notification dropdown toggle
-      notificationButton.addEventListener('click', function(e) {
-        e.stopPropagation();
-        notificationDropdown.classList.toggle('hidden');
-        // Mark as read when opened
-        if (!notificationDropdown.classList.contains('hidden')) {
-          notificationBadge.classList.add('hidden');
-        }
-      });
-
-      // Close notification dropdown when clicking outside
-      document.addEventListener('click', function(e) {
-        if (!notificationButton.contains(e.target) && !notificationDropdown.contains(e.target)) {
-          notificationDropdown.classList.add('hidden');
         }
       });
 
@@ -710,16 +826,31 @@
         setActiveTab('teamMembers');
       });
       
+      invitationsTab.addEventListener('click', function() {
+        setActiveTab('invitations');
+      });
+      
+      // Invitations sub-tab switching
+      receivedInvitationsTab.addEventListener('click', function() {
+        setActiveInvitationsTab('received');
+      });
+      
+      sentInvitationsTab.addEventListener('click', function() {
+        setActiveInvitationsTab('sent');
+      });
+      
       // Set active tab
       function setActiveTab(tab) {
         // Reset all tabs
         sharedWithMeTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
         sharedByMeTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
         teamMembersTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+        invitationsTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
         
         sharedWithMeContent.classList.add('hidden');
         sharedByMeContent.classList.add('hidden');
         teamMembersContent.classList.add('hidden');
+        invitationsContent.classList.add('hidden');
         
         // Set active tab
         if (tab === 'sharedWithMe') {
@@ -731,6 +862,28 @@
         } else if (tab === 'teamMembers') {
           teamMembersTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
           teamMembersContent.classList.remove('hidden');
+        } else if (tab === 'invitations') {
+          invitationsTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm';
+          invitationsContent.classList.remove('hidden');
+        }
+      }
+      
+      // Set active invitations tab
+      function setActiveInvitationsTab(tab) {
+        // Reset all tabs
+        receivedInvitationsTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm';
+        sentInvitationsTab.className = 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm';
+        
+        receivedInvitationsContent.classList.add('hidden');
+        sentInvitationsContent.classList.add('hidden');
+        
+        // Set active tab
+        if (tab === 'received') {
+          receivedInvitationsTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm';
+          receivedInvitationsContent.classList.remove('hidden');
+        } else if (tab === 'sent') {
+          sentInvitationsTab.className = 'text-primary-600 border-primary-500 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm';
+          sentInvitationsContent.classList.remove('hidden');
         }
       }
       
@@ -743,16 +896,32 @@
         inviteModal.classList.remove('hidden');
       });
       
+      emptySendInviteBtn.addEventListener('click', function() {
+        inviteModal.classList.remove('hidden');
+      });
+      
       // Close invite modal
       closeInviteModal.addEventListener('click', function() {
         inviteModal.classList.add('hidden');
+        // Reset form and validation messages
+        inviteForm.reset();
+        emailValidationMessage.classList.add('hidden');
       });
       
       // Click outside to close invite modal
       inviteModal.addEventListener('click', function(e) {
         if (e.target === inviteModal) {
           inviteModal.classList.add('hidden');
+          // Reset form and validation messages
+          inviteForm.reset();
+          emailValidationMessage.classList.add('hidden');
         }
+      });
+      
+      // Email validation on input
+      inviteEmail.addEventListener('input', function() {
+        // Hide validation message when user starts typing again
+        emailValidationMessage.classList.add('hidden');
       });
       
       // Invite form submit
@@ -766,7 +935,19 @@
         const message = inviteMessage.value.trim();
         
         if (!email) {
-          showToast('Please enter an email address', 'error');
+          showValidationError('Please enter an email address');
+          return;
+        }
+        
+        // Validate email format
+        if (!isValidEmail(email)) {
+          showValidationError('Please enter a valid email address');
+          return;
+        }
+        
+        // Check if trying to invite self
+        if (email.toLowerCase() === user.email.toLowerCase()) {
+          showValidationError('You cannot invite yourself');
           return;
         }
 
@@ -777,15 +958,24 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Sending...
+          Checking...
         `;
         
-        // Find user by email
+        // Check if user exists in database
         checkUserExists(email)
           .then(userExists => {
             if (!userExists) {
               throw new Error('User with this email not found in our system');
             }
+            
+            // Update button text
+            sendInviteBtn.innerHTML = `
+              <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Sending...
+            `;
             
             // Check if already a team member
             return database.ref(`teamMembers/${user.uid}/${email.replace(/[.#$\/[\]]/g, '_')}`).once('value')
@@ -794,30 +984,44 @@
                   throw new Error('This user is already a team member');
                 }
                 
-                // Send invitation email
-                return sendInvitationEmail(email, message);
+                // Check if invitation already sent
+                return database.ref(`sentInvitations/${user.uid}/${email.replace(/[.#$\/[\]]/g, '_')}`).once('value')
+                  .then(inviteSnapshot => {
+                    if (inviteSnapshot.exists() && inviteSnapshot.val().status === 'pending') {
+                      throw new Error('You have already sent an invitation to this email');
+                    }
+                    
+                    // Add to invitations
+                    const invitationData = {
+                      fromUid: user.uid,
+                      fromEmail: user.email,
+                      fromName: user.displayName || user.email.split('@')[0],
+                      toEmail: email,
+                      message: message,
+                      status: 'pending',
+                      createdAt: firebase.database.ServerValue.TIMESTAMP
+                    };
+                    
+                    // Add to sent invitations
+                    return database.ref(`sentInvitations/${user.uid}/${email.replace(/[.#$\/[\]]/g, '_')}`).set(invitationData)
+                      .then(() => {
+                        // Add to received invitations
+                        return database.ref(`receivedInvitations/${email.replace(/[.#$\/[\]]/g, '_')}/${user.uid}`).set(invitationData);
+                      });
+                  });
               });
-          })
-          .then(() => {
-            // Add to team members
-            return database.ref(`teamMembers/${user.uid}/${email.replace(/[.#$\/[\]]/g, '_')}`).set({
-              email: email,
-              message: message,
-              status: 'pending',
-              createdAt: firebase.database.ServerValue.TIMESTAMP
-            });
           })
           .then(() => {
             inviteModal.classList.add('hidden');
             inviteForm.reset();
             showToast('Team invitation sent successfully', 'success');
             
-            // Reload team members
-            loadTeamMembers(user.uid);
+            // Reload invitations
+            loadSentInvitations(auth.currentUser.uid);
           })
           .catch(error => {
             console.error('Error inviting team member:', error);
-            showToast(error.message, 'error');
+            showValidationError(error.message);
           })
           .finally(() => {
             // Reset button state
@@ -831,6 +1035,24 @@
           });
       });
       
+      // Show validation error
+      function showValidationError(message) {
+        emailValidationMessage.textContent = message;
+        emailValidationMessage.classList.remove('hidden');
+        inviteEmail.classList.add('border-red-500');
+        
+        // Remove error styling after 3 seconds
+        setTimeout(() => {
+          inviteEmail.classList.remove('border-red-500');
+        }, 3000);
+      }
+      
+      // Validate email format
+      function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      }
+      
       // Close task details modal
       closeTaskDetailsModal.addEventListener('click', function() {
         taskDetailsModal.classList.add('hidden');
@@ -841,6 +1063,127 @@
         if (e.target === taskDetailsModal) {
           taskDetailsModal.classList.add('hidden');
         }
+      });
+      
+      // Close invitation response modal
+      closeInvitationResponseModal.addEventListener('click', function() {
+        invitationResponseModal.classList.add('hidden');
+      });
+      
+      // Click outside to close invitation response modal
+      invitationResponseModal.addEventListener('click', function(e) {
+        if (e.target === invitationResponseModal) {
+          invitationResponseModal.classList.add('hidden');
+        }
+      });
+      
+      // Accept invitation
+      acceptInvitationBtn.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user || !currentInvitationId || !currentInvitationData) return;
+        
+        // Update button state
+        acceptInvitationBtn.disabled = true;
+        acceptInvitationBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Processing...
+        `;
+        
+        // Update invitation status
+        const fromUid = currentInvitationData.fromUid;
+        const updates = {};
+        
+        // Update in received invitations
+        updates[`receivedInvitations/${user.email.replace(/[.#$\/[\]]/g, '_')}/${fromUid}/status`] = 'accepted';
+        updates[`receivedInvitations/${user.email.replace(/[.#$\/[\]]/g, '_')}/${fromUid}/respondedAt`] = firebase.database.ServerValue.TIMESTAMP;
+        
+        // Update in sent invitations
+        updates[`sentInvitations/${fromUid}/${user.email.replace(/[.#$\/[\]]/g, '_')}/status`] = 'accepted';
+        updates[`sentInvitations/${fromUid}/${user.email.replace(/[.#$\/[\]]/g, '_')}/respondedAt`] = firebase.database.ServerValue.TIMESTAMP;
+        
+        // Add to team members
+        updates[`teamMembers/${fromUid}/${user.email.replace(/[.#$\/[\]]/g, '_')}`] = {
+          email: user.email,
+          name: user.displayName || user.email.split('@')[0],
+          status: 'active',
+          createdAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        // Add the inviter to your team members
+        updates[`teamMembers/${user.uid}/${currentInvitationData.fromEmail.replace(/[.#$\/[\]]/g, '_')}`] = {
+          email: currentInvitationData.fromEmail,
+          name: currentInvitationData.fromName,
+          status: 'active',
+          createdAt: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        database.ref().update(updates)
+          .then(() => {
+            invitationResponseModal.classList.add('hidden');
+            showToast('Invitation accepted successfully', 'success');
+            
+            // Reload invitations and team members
+            loadReceivedInvitations(user.uid);
+            loadTeamMembers(user.uid);
+          })
+          .catch(error => {
+            console.error('Error accepting invitation:', error);
+            showToast('Error accepting invitation: ' + error.message, 'error');
+          })
+          .finally(() => {
+            // Reset button state
+            acceptInvitationBtn.disabled = false;
+            acceptInvitationBtn.innerHTML = 'Accept';
+          });
+      });
+      
+      // Decline invitation
+      declineInvitationBtn.addEventListener('click', function() {
+        const user = auth.currentUser;
+        if (!user || !currentInvitationId || !currentInvitationData) return;
+        
+        // Update button state
+        declineInvitationBtn.disabled = true;
+        declineInvitationBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Processing...
+        `;
+        
+        // Update invitation status
+        const fromUid = currentInvitationData.fromUid;
+        const updates = {};
+        
+        // Update in received invitations
+        updates[`receivedInvitations/${user.email.replace(/[.#$\/[\]]/g, '_')}/${fromUid}/status`] = 'declined';
+        updates[`receivedInvitations/${user.email.replace(/[.#$\/[\]]/g, '_')}/${fromUid}/respondedAt`] = firebase.database.ServerValue.TIMESTAMP;
+        
+        // Update in sent invitations
+        updates[`sentInvitations/${fromUid}/${user.email.replace(/[.#$\/[\]]/g, '_')}/status`] = 'declined';
+        updates[`sentInvitations/${fromUid}/${user.email.replace(/[.#$\/[\]]/g, '_')}/respondedAt`] = firebase.database.ServerValue.TIMESTAMP;
+        
+        database.ref().update(updates)
+          .then(() => {
+            invitationResponseModal.classList.add('hidden');
+            showToast('Invitation declined', 'success');
+            
+            // Reload invitations
+            loadReceivedInvitations(user.uid);
+          })
+          .catch(error => {
+            console.error('Error declining invitation:', error);
+            showToast('Error declining invitation: ' + error.message, 'error');
+          })
+          .finally(() => {
+            // Reset button state
+            declineInvitationBtn.disabled = false;
+            declineInvitationBtn.innerHTML = 'Decline';
+          });
       });
       
       // Accept task
@@ -854,6 +1197,7 @@
         }).then(() => {
           taskDetailsModal.classList.add('hidden');
           showToast('Task accepted successfully', 'success');
+          loadSharedWithMe(user.uid, sharedWithMeFilter.value);
         }).catch(error => {
           console.error('Error accepting task:', error);
           showToast('Error accepting task: ' + error.message, 'error');
@@ -870,6 +1214,7 @@
             .then(() => {
               taskDetailsModal.classList.add('hidden');
               showToast('Task rejected successfully', 'success');
+              loadSharedWithMe(user.uid, sharedWithMeFilter.value);
             })
             .catch(error => {
               console.error('Error rejecting task:', error);
@@ -901,6 +1246,9 @@
             const userData = snapshot.val();
             if (userData) {
               userDisplayName.textContent = userData.name;
+              
+              // Cache user data
+              cachedUsers[userId] = userData;
             }
           })
           .catch(error => {
@@ -910,24 +1258,27 @@
       
       // Check if user exists in database
       function checkUserExists(email) {
-        // Simulate database check
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            // For demo purposes, 70% chance user exists
-            resolve(Math.random() > 0.3);
-          }, 1000);
-        });
-      }
-
-      // Send invitation email
-      function sendInvitationEmail(email, message) {
-        // Simulate sending email
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            // For demo purposes, 90% chance email sends successfully
-            resolve(Math.random() > 0.1);
-          }, 1500);
-        });
+        // First check if we have this user in our cache
+        for (const userId in cachedUsers) {
+          if (cachedUsers[userId].email && cachedUsers[userId].email.toLowerCase() === email.toLowerCase()) {
+            return Promise.resolve(true);
+          }
+        }
+        
+        // If not in cache, query the database
+        return database.ref('users').orderByChild('email').equalTo(email).once('value')
+          .then(snapshot => {
+            const exists = snapshot.exists();
+            
+            // If user exists, cache their data
+            if (exists) {
+              snapshot.forEach(childSnapshot => {
+                cachedUsers[childSnapshot.key] = childSnapshot.val();
+              });
+            }
+            
+            return exists;
+          });
       }
       
       // Load shared with me tasks
@@ -936,7 +1287,8 @@
         
         sharedTasksRef.once('value')
           .then(snapshot => {
-            sharedWithMeList.innerHTML = '';
+            sharedWithMeTable.innerHTML = '';
+            sharedWithMeCards.innerHTML = '';
             
             if (snapshot.exists()) {
               let tasks = [];
@@ -968,46 +1320,130 @@
                 emptySharedWithMe.classList.add('hidden');
                 
                 tasks.forEach(task => {
+                  // Create table row for desktop view
                   const row = createSharedWithMeRow(task);
-                  sharedWithMeList.appendChild(row);
+                  sharedWithMeTable.appendChild(row);
+                  
+                  // Create card for mobile view
+                  const card = createSharedWithMeCard(task);
+                  sharedWithMeCards.appendChild(card);
                 });
               } else {
-                sharedWithMeList.innerHTML = `
+                sharedWithMeTable.innerHTML = `
                   <tr>
                     <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No shared tasks found</td>
                   </tr>
                 `;
+                sharedWithMeCards.innerHTML = `
+                  <li class="px-4 py-4 text-center text-sm text-gray-500">No shared tasks found</li>
+                `;
                 emptySharedWithMe.classList.remove('hidden');
               }
             } else {
-              sharedWithMeList.innerHTML = `
+              sharedWithMeTable.innerHTML = `
                 <tr>
                   <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No shared tasks found</td>
                 </tr>
+              `;
+              sharedWithMeCards.innerHTML = `
+                <li class="px-4 py-4 text-center text-sm text-gray-500">No shared tasks found</li>
               `;
               emptySharedWithMe.classList.remove('hidden');
             }
           })
           .catch(error => {
             console.error('Error loading shared tasks:', error);
-            sharedWithMeList.innerHTML = `
+            sharedWithMeTable.innerHTML = `
               <tr>
                 <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Error loading shared tasks</td>
               </tr>
+            `;
+            sharedWithMeCards.innerHTML = `
+              <li class="px-4 py-4 text-center text-sm text-gray-500">Error loading shared tasks</li>
             `;
           });
       }
       
       // Load shared by me tasks
       function loadSharedByMe(userId, filter = 'all') {
-        // This would require a more complex query in a real app
-        // For simplicity, we'll just show a placeholder
-        sharedByMeList.innerHTML = `
-          <tr>
-            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No shared tasks found</td>
-          </tr>
-        `;
-        emptySharedByMe.classList.remove('hidden');
+        // In a real app, you would query your database for tasks shared by the user
+        database.ref('sharedByMe/' + userId).once('value')
+          .then(snapshot => {
+            sharedByMeTable.innerHTML = '';
+            sharedByMeCards.innerHTML = '';
+            
+            if (snapshot.exists()) {
+              let tasks = [];
+              
+              snapshot.forEach(childSnapshot => {
+                const taskId = childSnapshot.key;
+                const taskData = childSnapshot.val();
+                
+                tasks.push({
+                  id: taskId,
+                  ...taskData
+                });
+              });
+              
+              // Apply filter
+              if (filter !== 'all') {
+                tasks = tasks.filter(task => {
+                  if (filter === 'completed' && task.completed) return true;
+                  if (filter === 'accepted' && task.status === 'accepted' && !task.completed) return true;
+                  if (filter === 'pending' && (!task.status || task.status === 'pending')) return true;
+                  return false;
+                });
+              }
+              
+              // Sort by newest first
+              tasks.sort((a, b) => (b.sharedAt || 0) - (a.sharedAt || 0));
+              
+              if (tasks.length > 0) {
+                emptySharedByMe.classList.add('hidden');
+                
+                tasks.forEach(task => {
+                  // Create table row for desktop view
+                  const row = createSharedByMeRow(task);
+                  sharedByMeTable.appendChild(row);
+                  
+                  // Create card for mobile view
+                  const card = createSharedByMeCard(task);
+                  sharedByMeCards.appendChild(card);
+                });
+              } else {
+                sharedByMeTable.innerHTML = `
+                  <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No shared tasks found</td>
+                  </tr>
+                `;
+                sharedByMeCards.innerHTML = `
+                  <li class="px-4 py-4 text-center text-sm text-gray-500">No shared tasks found</li>
+                `;
+                emptySharedByMe.classList.remove('hidden');
+              }
+            } else {
+              sharedByMeTable.innerHTML = `
+                <tr>
+                  <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No shared tasks found</td>
+                </tr>
+              `;
+              sharedByMeCards.innerHTML = `
+                <li class="px-4 py-4 text-center text-sm text-gray-500">No shared tasks found</li>
+              `;
+              emptySharedByMe.classList.remove('hidden');
+            }
+          })
+          .catch(error => {
+            console.error('Error loading shared tasks:', error);
+            sharedByMeTable.innerHTML = `
+              <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Error loading shared tasks</td>
+              </tr>
+            `;
+            sharedByMeCards.innerHTML = `
+              <li class="px-4 py-4 text-center text-sm text-gray-500">Error loading shared tasks</li>
+            `;
+          });
       }
       
       // Load team members
@@ -1062,7 +1498,114 @@
           });
       }
       
-      // Create shared with me row
+      // Load received invitations
+      function loadReceivedInvitations(userId) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const receivedInvitationsRef = database.ref(`receivedInvitations/${user.email.replace(/[.#$\/[\]]/g, '_')}`);
+        
+        receivedInvitationsRef.once('value')
+          .then(snapshot => {
+            receivedInvitationsList.innerHTML = '';
+            
+            if (snapshot.exists()) {
+              let invitations = [];
+              
+              snapshot.forEach(childSnapshot => {
+                const invitationId = childSnapshot.key;
+                const invitationData = childSnapshot.val();
+                
+                invitations.push({
+                  id: invitationId,
+                  ...invitationData
+                });
+              });
+              
+              // Sort by newest first
+              invitations.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+              
+              if (invitations.length > 0) {
+                emptyReceivedInvitations.classList.add('hidden');
+                
+                invitations.forEach(invitation => {
+                  const item = createReceivedInvitationItem(invitation);
+                  receivedInvitationsList.appendChild(item);
+                });
+              } else {
+                receivedInvitationsList.innerHTML = `
+                  <li class="px-6 py-4 text-center text-sm text-gray-500">No invitations found</li>
+                `;
+                emptyReceivedInvitations.classList.remove('hidden');
+              }
+            } else {
+              receivedInvitationsList.innerHTML = `
+                <li class="px-6 py-4 text-center text-sm text-gray-500">No invitations found</li>
+              `;
+              emptyReceivedInvitations.classList.remove('hidden');
+            }
+          })
+          .catch(error => {
+            console.error('Error loading received invitations:', error);
+            receivedInvitationsList.innerHTML = `
+              <li class="px-6 py-4 text-center text-sm text-gray-500">Error loading invitations</li>
+            `;
+          });
+      }
+      
+      // Load sent invitations
+      function loadSentInvitations(userId) {
+        const sentInvitationsRef = database.ref(`sentInvitations/${userId}`);
+        
+        sentInvitationsRef.once('value')
+          .then(snapshot => {
+            sentInvitationsList.innerHTML = '';
+            
+            if (snapshot.exists()) {
+              let invitations = [];
+              
+              snapshot.forEach(childSnapshot => {
+                const invitationId = childSnapshot.key;
+                const invitationData = childSnapshot.val();
+                
+                invitations.push({
+                  id: invitationId,
+                  ...invitationData
+                });
+              });
+              
+              // Sort by newest first
+              invitations.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+              
+              if (invitations.length > 0) {
+                emptySentInvitations.classList.add('hidden');
+                
+                invitations.forEach(invitation => {
+                  const item = createSentInvitationItem(invitation);
+                  sentInvitationsList.appendChild(item);
+                });
+              } else {
+                sentInvitationsList.innerHTML = `
+                  <li class="px-6 py-4 text-center text-sm text-gray-500">No invitations found</li>
+                `;
+                emptySentInvitations.classList.remove('hidden');
+              }
+            } else {
+              sentInvitationsList.innerHTML = `
+                <li class="px-6 py-4 text-center text-sm text-gray-500">No invitations found</li>
+              `;
+              emptySentInvitations.classList.remove('hidden');
+            }
+          })
+          .catch(error => {
+            console.error('Error loading sent invitations:', error);
+            sentInvitationsList.innerHTML = `
+              <li class="px-6 py-4 text-center text-sm text-gray-500">Error loading invitations</li>
+            `;
+          });
+      }
+      
+      // Create shared with me row (for desktop table view)
       function createSharedWithMeRow(task) {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50 transition-colors';
@@ -1195,10 +1738,357 @@
         return row;
       }
       
+      // Create shared with me card (for mobile view)
+      function createSharedWithMeCard(task) {
+        const card = document.createElement('li');
+        card.className = 'px-4 py-4 border-b border-gray-200';
+        
+        // Format date
+        let formattedDate = 'Unknown';
+        if (task.sharedAt) {
+          const date = new Date(task.sharedAt);
+          formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Priority badge class
+        let priorityClass = '';
+        let priorityText = task.priority || 'medium';
+        
+        switch (priorityText.toLowerCase()) {
+          case 'high':
+            priorityClass = 'bg-red-100 text-red-800';
+            break;
+          case 'medium':
+            priorityClass = 'bg-yellow-100 text-yellow-800';
+            break;
+          case 'low':
+            priorityClass = 'bg-green-100 text-green-800';
+            break;
+          default:
+            priorityClass = 'bg-gray-100 text-gray-800';
+        }
+        
+        // Status badge class
+        let statusClass = '';
+        let statusText = '';
+        
+        if (task.completed) {
+          statusClass = 'bg-green-100 text-green-800';
+          statusText = 'Completed';
+        } else if (task.status === 'accepted') {
+          statusClass = 'bg-blue-100 text-blue-800';
+          statusText = 'Accepted';
+        } else {
+          statusClass = 'bg-yellow-100 text-yellow-800';
+          statusText = 'Pending';
+        }
+        
+        card.innerHTML = `
+          <div class="flex flex-col space-y-3">
+            <div class="flex justify-between items-start">
+              <div class="text-sm font-medium text-gray-900">${task.title || 'Untitled Task'}</div>
+              <div class="flex space-x-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">
+                  ${priorityText.charAt(0).toUpperCase() + priorityText.slice(1)}
+                </span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                  ${statusText}
+                </span>
+              </div>
+            </div>
+            ${task.description ? `<div class="text-xs text-gray-500">${task.description}</div>` : ''}
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-8 w-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                ${task.fromName ? task.fromName.charAt(0).toUpperCase() : '?'}
+              </div>
+              <div class="ml-3">
+                <div class="text-sm font-medium text-gray-900">${task.fromName || 'Unknown'}</div>
+                <div class="text-xs text-gray-500">${task.fromEmail || ''}</div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center">
+              <div class="text-xs text-gray-500">Shared on ${formattedDate}</div>
+              <div class="flex space-x-2">
+                <button class="view-task-btn p-1 text-primary-600 hover:text-primary-900" data-task-id="${task.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+                ${!task.completed && (!task.status || task.status === 'pending') ? `
+                  <button class="accept-task-btn p-1 text-green-600 hover:text-green-900" data-task-id="${task.id}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+                  <button class="reject-task-btn p-1 text-red-600 hover:text-red-900" data-task-id="${task.id}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Add event listeners
+        const viewBtn = card.querySelector('.view-task-btn');
+        viewBtn.addEventListener('click', function() {
+          openTaskDetails(this.dataset.taskId);
+        });
+        
+        const acceptBtn = card.querySelector('.accept-task-btn');
+        if (acceptBtn) {
+          acceptBtn.addEventListener('click', function() {
+            acceptTask(this.dataset.taskId);
+          });
+        }
+        
+        const rejectBtn = card.querySelector('.reject-task-btn');
+        if (rejectBtn) {
+          rejectBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to reject this task?')) {
+              rejectTask(this.dataset.taskId);
+            }
+          });
+        }
+        
+        return card;
+      }
+      
+      // Create shared by me row (for desktop table view)
+      function createSharedByMeRow(task) {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-colors';
+        
+        // Format date
+        let formattedDate = 'Unknown';
+        if (task.sharedAt) {
+          const date = new Date(task.sharedAt);
+          formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Priority badge class
+        let priorityClass = '';
+        let priorityText = task.priority || 'medium';
+        
+        switch (priorityText.toLowerCase()) {
+          case 'high':
+            priorityClass = 'bg-red-100 text-red-800';
+            break;
+          case 'medium':
+            priorityClass = 'bg-yellow-100 text-yellow-800';
+            break;
+          case 'low':
+            priorityClass = 'bg-green-100 text-green-800';
+            break;
+          default:
+            priorityClass = 'bg-gray-100 text-gray-800';
+        }
+        
+        // Status badge class
+        let statusClass = '';
+        let statusText = '';
+        
+        if (task.completed) {
+          statusClass = 'bg-green-100 text-green-800';
+          statusText = 'Completed';
+        } else if (task.status === 'accepted') {
+          statusClass = 'bg-blue-100 text-blue-800';
+          statusText = 'Accepted';
+        } else {
+          statusClass = 'bg-yellow-100 text-yellow-800';
+          statusText = 'Pending';
+        }
+        
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div>
+                <div class="text-sm font-medium text-gray-900">
+                  ${task.title || 'Untitled Task'}
+                </div>
+                ${task.description ? `<div class="text-xs text-gray-500 mt-1 max-w-xs truncate">${task.description}</div>` : ''}
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-8 w-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                ${task.toName ? task.toName.charAt(0).toUpperCase() : '?'}
+              </div>
+              <div class="ml-3">
+                <div class="text-sm font-medium text-gray-900">${task.toName || 'Unknown'}</div>
+                <div class="text-xs text-gray-500">${task.toEmail || ''}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">
+              ${priorityText.charAt(0).toUpperCase() + priorityText.slice(1)}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+              ${statusText}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            ${formattedDate}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <div class="flex justify-end items-center space-x-2 task-actions">
+              <button class="view-task-btn text-primary-600 hover:text-primary-900" data-task-id="${task.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              <button class="delete-task-btn text-red-600 hover:text-red-900" data-task-id="${task.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        `;
+        
+        // Add event listeners
+        const viewBtn = row.querySelector('.view-task-btn');
+        viewBtn.addEventListener('click', function() {
+          openTaskDetails(this.dataset.taskId);
+        });
+        
+        const deleteBtn = row.querySelector('.delete-task-btn');
+        deleteBtn.addEventListener('click', function() {
+          if (confirm('Are you sure you want to delete this shared task?')) {
+            deleteSharedTask(this.dataset.taskId);
+          }
+        });
+        
+        return row;
+      }
+      
+      // Create shared by me card (for mobile view)
+      function createSharedByMeCard(task) {
+        const card = document.createElement('li');
+        card.className = 'px-4 py-4 border-b border-gray-200';
+        
+        // Format date
+        let formattedDate = 'Unknown';
+        if (task.sharedAt) {
+          const date = new Date(task.sharedAt);
+          formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Priority badge class
+        let priorityClass = '';
+        let priorityText = task.priority || 'medium';
+        
+        switch (priorityText.toLowerCase()) {
+          case 'high':
+            priorityClass = 'bg-red-100 text-red-800';
+            break;
+          case 'medium':
+            priorityClass = 'bg-yellow-100 text-yellow-800';
+            break;
+          case 'low':
+            priorityClass = 'bg-green-100 text-green-800';
+            break;
+          default:
+            priorityClass = 'bg-gray-100 text-gray-800';
+        }
+        
+        // Status badge class
+        let statusClass = '';
+        let statusText = '';
+        
+        if (task.completed) {
+          statusClass = 'bg-green-100 text-green-800';
+          statusText = 'Completed';
+        } else if (task.status === 'accepted') {
+          statusClass = 'bg-blue-100 text-blue-800';
+          statusText = 'Accepted';
+        } else {
+          statusClass = 'bg-yellow-100 text-yellow-800';
+          statusText = 'Pending';
+        }
+        
+        card.innerHTML = `
+          <div class="flex flex-col space-y-3">
+            <div class="flex justify-between items-start">
+              <div class="text-sm font-medium text-gray-900">${task.title || 'Untitled Task'}</div>
+              <div class="flex space-x-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${priorityClass}">
+                  ${priorityText.charAt(0).toUpperCase() + priorityText.slice(1)}
+                </span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                  ${statusText}
+                </span>
+              </div>
+            </div>
+            ${task.description ? `<div class="text-xs text-gray-500">${task.description}</div>` : ''}
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-8 w-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                ${task.toName ? task.toName.charAt(0).toUpperCase() : '?'}
+              </div>
+              <div class="ml-3">
+                <div class="text-sm font-medium text-gray-900">${task.toName || 'Unknown'}</div>
+                <div class="text-xs text-gray-500">${task.toEmail || ''}</div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center">
+              <div class="text-xs text-gray-500">Shared on ${formattedDate}</div>
+              <div class="flex space-x-2">
+                <button class="view-task-btn p-1 text-primary-600 hover:text-primary-900" data-task-id="${task.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+                <button class="delete-task-btn p-1 text-red-600 hover:text-red-900" data-task-id="${task.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Add event listeners
+        const viewBtn = card.querySelector('.view-task-btn');
+        viewBtn.addEventListener('click', function() {
+          openTaskDetails(this.dataset.taskId);
+        });
+        
+        const deleteBtn = card.querySelector('.delete-task-btn');
+        deleteBtn.addEventListener('click', function() {
+          if (confirm('Are you sure you want to delete this shared task?')) {
+            deleteSharedTask(this.dataset.taskId);
+          }
+        });
+        
+        return card;
+      }
+      
       // Create team member item
       function createTeamMemberItem(member) {
         const item = document.createElement('li');
-        item.className = 'px-6 py-4 flex items-center justify-between';
+        item.className = 'px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4';
         
         // Format date
         let formattedDate = 'Unknown';
@@ -1256,6 +2146,216 @@
             removeTeamMember(this.dataset.memberId);
           }
         });
+        
+        return item;
+      }
+      
+      // Create received invitation item
+      function createReceivedInvitationItem(invitation) {
+        const item = document.createElement('li');
+        
+        // Format date
+        let formattedDate = 'Unknown';
+        if (invitation.createdAt) {
+          const date = new Date(invitation.createdAt);
+          formattedDate = date.toLocaleDate  {
+          const date = new Date(invitation.createdAt);
+          formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Format response date if available
+        let responseDate = '';
+        if (invitation.respondedAt) {
+          const date = new Date(invitation.respondedAt);
+          responseDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Status class and text
+        let statusClass = 'invitation-status pending';
+        let statusText = 'Pending';
+        let statusIcon = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        `;
+        
+        if (invitation.status === 'accepted') {
+          statusClass = 'invitation-status accepted';
+          statusText = 'Accepted';
+          statusIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          `;
+        } else if (invitation.status === 'declined') {
+          statusClass = 'invitation-status declined';
+          statusText = 'Declined';
+          statusIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          `;
+        }
+        
+        // Get name from email if name not available
+        const name = invitation.fromName || invitation.fromEmail.split('@')[0];
+        const initial = name.charAt(0).toUpperCase();
+        
+        item.className = `px-6 py-4 ${statusClass}`;
+        item.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                ${initial}
+              </div>
+              <div class="ml-4">
+                <div class="flex items-center">
+                  <div class="text-sm font-medium text-gray-900">${name}</div>
+                  <div class="ml-2 flex-shrink-0">
+                    ${statusIcon}
+                  </div>
+                </div>
+                <div class="text-xs text-gray-500">${invitation.fromEmail || ''}</div>
+                <div class="text-xs text-gray-500 mt-1">Received on ${formattedDate}</div>
+                ${invitation.respondedAt ? `<div class="text-xs text-gray-500 mt-1">Responded on ${responseDate}</div>` : ''}
+                ${invitation.message ? `<div class="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded-md">"${invitation.message}"</div>` : ''}
+              </div>
+            </div>
+            <div class="flex items-center">
+              ${invitation.status === 'pending' ? `
+                <button class="respond-invitation-btn bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-3 py-1 rounded-md hover:opacity-90 transition-opacity text-sm" data-invitation-id="${invitation.id}">
+                  Respond
+                </button>
+              ` : `
+                <span class="text-sm font-medium ${invitation.status === 'accepted' ? 'text-green-600' : 'text-red-600'}">
+                  ${statusText}
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+        
+        // Add event listeners
+        const respondBtn = item.querySelector('.respond-invitation-btn');
+        if (respondBtn) {
+          respondBtn.addEventListener('click', function() {
+            openInvitationResponse(invitation.id, invitation);
+          });
+        }
+        
+        return item;
+      }
+      
+      // Create sent invitation item
+      function createSentInvitationItem(invitation) {
+        const item = document.createElement('li');
+        
+        // Format date
+        let formattedDate = 'Unknown';
+        if (invitation.createdAt) {
+          const date = new Date(invitation.createdAt);
+          formattedDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Format response date if available
+        let responseDate = '';
+        if (invitation.respondedAt) {
+          const date = new Date(invitation.respondedAt);
+          responseDate = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        }
+        
+        // Status class and text
+        let statusClass = 'invitation-status pending';
+        let statusText = 'Pending';
+        let statusIcon = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        `;
+        
+        if (invitation.status === 'accepted') {
+          statusClass = 'invitation-status accepted';
+          statusText = 'Accepted';
+          statusIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          `;
+        } else if (invitation.status === 'declined') {
+          statusClass = 'invitation-status declined';
+          statusText = 'Declined';
+          statusIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          `;
+        }
+        
+        // Get name from email if name not available
+        const toName = invitation.toEmail.split('@')[0];
+        const initial = toName.charAt(0).toUpperCase();
+        
+        item.className = `px-6 py-4 ${statusClass}`;
+        item.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                ${initial}
+              </div>
+              <div class="ml-4">
+                <div class="flex items-center">
+                  <div class="text-sm font-medium text-gray-900">${toName}</div>
+                  <div class="ml-2 flex-shrink-0">
+                    ${statusIcon}
+                  </div>
+                </div>
+                <div class="text-xs text-gray-500">${invitation.toEmail || ''}</div>
+                <div class="text-xs text-gray-500 mt-1">Sent on ${formattedDate}</div>
+                ${invitation.respondedAt ? `<div class="text-xs text-gray-500 mt-1">Responded on ${responseDate}</div>` : ''}
+                ${invitation.message ? `<div class="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded-md">"${invitation.message}"</div>` : ''}
+              </div>
+            </div>
+            <div class="flex items-center">
+              ${invitation.status === 'pending' ? `
+                <button class="cancel-invitation-btn text-red-600 hover:text-red-900 p-1" data-invitation-id="${invitation.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ` : `
+                <span class="text-sm font-medium ${invitation.status === 'accepted' ? 'text-green-600' : 'text-red-600'}">
+                  ${statusText}
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+        
+        // Add event listeners
+        const cancelBtn = item.querySelector('.cancel-invitation-btn');
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to cancel this invitation?')) {
+              cancelInvitation(invitation.id, invitation);
+            }
+          });
+        }
         
         return item;
       }
@@ -1334,6 +2434,43 @@
           });
       }
       
+      // Open invitation response
+      function openInvitationResponse(invitationId, invitationData) {
+        currentInvitationId = invitationId;
+        currentInvitationData = invitationData;
+        
+        // Set invitation details
+        const name = invitationData.fromName || invitationData.fromEmail.split('@')[0];
+        const initial = name.charAt(0).toUpperCase();
+        
+        invitationUserInitial.textContent = initial;
+        invitationUserName.textContent = name;
+        invitationUserEmail.textContent = invitationData.fromEmail;
+        invitationUserNameText.textContent = name;
+        
+        // Format date
+        if (invitationData.createdAt) {
+          const date = new Date(invitationData.createdAt);
+          invitationReceivedDate.textContent = date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        } else {
+          invitationReceivedDate.textContent = 'Unknown';
+        }
+        
+        // Message
+        if (invitationData.message) {
+          invitationMessage.classList.remove('hidden');
+          invitationMessageText.textContent = invitationData.message;
+        } else {
+          invitationMessage.classList.add('hidden');
+        }
+        
+        invitationResponseModal.classList.remove('hidden');
+      }
+      
       // Accept task
       function acceptTask(taskId) {
         const user = auth.currentUser;
@@ -1364,6 +2501,45 @@
           .catch(error => {
             console.error('Error rejecting task:', error);
             showToast('Error rejecting task: ' + error.message, 'error');
+          });
+      }
+      
+      // Delete shared task
+      function deleteSharedTask(taskId) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        database.ref(`sharedByMe/${user.uid}/${taskId}`).remove()
+          .then(() => {
+            showToast('Shared task deleted successfully', 'success');
+            loadSharedByMe(user.uid, sharedByMeFilter.value);
+          })
+          .catch(error => {
+            console.error('Error deleting shared task:', error);
+            showToast('Error deleting shared task: ' + error.message, 'error');
+          });
+      }
+      
+      // Cancel invitation
+      function cancelInvitation(invitationId, invitationData) {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        const toEmail = invitationData.toEmail;
+        
+        // Remove from sent invitations
+        database.ref(`sentInvitations/${user.uid}/${toEmail.replace(/[.#$\/[\]]/g, '_')}`).remove()
+          .then(() => {
+            // Remove from received invitations
+            return database.ref(`receivedInvitations/${toEmail.replace(/[.#$\/[\]]/g, '_')}/${user.uid}`).remove();
+          })
+          .then(() => {
+            showToast('Invitation cancelled successfully', 'success');
+            loadSentInvitations(user.uid);
+          })
+          .catch(error => {
+            console.error('Error cancelling invitation:', error);
+            showToast('Error cancelling invitation: ' + error.message, 'error');
           });
       }
       
