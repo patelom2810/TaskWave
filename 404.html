@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌊</text></svg>">
+  <title>404 - Page Not Found | TaskWave</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eefaff',
+              100: '#d7f2ff',
+              200: '#b8e8ff',
+              300: '#88d9ff',
+              400: '#53c0ff',
+              500: '#2a9eff',
+              600: '#137aff',
+              700: '#1466ff',
+              800: '#1852db',
+              900: '#1a45ad',
+              950: '#162b69',
+            },
+            secondary: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            },
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'wave': 'wave 6s ease-in-out infinite',
+            'bounce-slow': 'bounce 3s ease-in-out infinite',
+            'spin-slow': 'spin 8s linear infinite',
+            'wiggle': 'wiggle 1s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            wave: {
+              '0%': { transform: 'translateX(0)' },
+              '50%': { transform: 'translateX(-25%)' },
+              '100%': { transform: 'translateX(0)' },
+            },
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(-3deg)' },
+              '50%': { transform: 'rotate(3deg)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom CSS -->
+  <style>
+    /* Wave background */
+    .wave-bg {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230099ff' fill-opacity='0.1' d='M0,224L48,208C96,192,192,160,288,154.7C384,149,480,171,576,181.3C672,192,768,192,864,170.7C960,149,1056,107,1152,101.3C1248,96,1344,128,1392,144L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center bottom;
+    }
+
+    /* Wave animation */
+    .wave-animation {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%232a9eff' fill-opacity='0.15' d='M0,160L48,154.7C96,149,192,139,288,138.7C384,139,480,149,576,149.3C672,149,768,139,864,144C960,149,1056,171,1152,160C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: repeat-x;
+      background-size: 200% 100%;
+      animation: wave 15s linear infinite;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Mobile menu */
+    .mobile-menu {
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .mobile-menu.active {
+      transform: translateX(0);
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      background-image: linear-gradient(to right, #2a9eff, #10b981);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #2a9eff;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #1466ff;
+    }
+
+    /* Button hover effects */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.1);
+      z-index: -2;
+    }
+    
+    .btn-primary:before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+      z-index: -1;
+    }
+    
+    .btn-primary:hover:before {
+      width: 100%;
+    }
+    
+    /* Construction animation */
+    .worker-animation {
+      animation: worker-move 6s linear infinite;
+    }
+    
+    @keyframes worker-move {
+      0%, 100% {
+        transform: translateX(-20px);
+      }
+      50% {
+        transform: translateX(20px);
+      }
+    }
+    
+    .hammer-animation {
+      transform-origin: 70% 70%;
+      animation: hammer-swing 1s ease-in-out infinite;
+    }
+    
+    @keyframes hammer-swing {
+      0%, 100% {
+        transform: rotate(-15deg);
+      }
+      50% {
+        transform: rotate(25deg);
+      }
+    }
+    
+    .gear-animation {
+      animation: spin 8s linear infinite;
+    }
+    
+    .wrench-animation {
+      transform-origin: center;
+      animation: wrench-rotate 3s ease-in-out infinite;
+    }
+    
+    @keyframes wrench-rotate {
+      0%, 100% {
+        transform: rotate(-20deg);
+      }
+      50% {
+        transform: rotate(20deg);
+      }
+    }
+    
+    .bubble {
+      opacity: 0;
+      transform: scale(0);
+      animation: bubble-appear 3s ease-in-out infinite;
+    }
+    
+    .bubble-1 {
+      animation-delay: 0s;
+    }
+    
+    .bubble-2 {
+      animation-delay: 0.5s;
+    }
+    
+    .bubble-3 {
+      animation-delay: 1s;
+    }
+    
+    @keyframes bubble-appear {
+      0%, 100% {
+        opacity: 0;
+        transform: scale(0) translateY(0);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1) translateY(-20px);
+      }
+    }
+    
+    /* 404 animations */
+    .number-container {
+      perspective: 1000px;
+    }
+    
+    .number-animation {
+      animation: flipNumber 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes flipNumber {
+      0% {
+        transform: rotateY(0);
+      }
+      100% {
+        transform: rotateY(10deg);
+      }
+    }
+
+    /* Progress bar animation */
+    .progress-bar-animation {
+      width: 0%;
+      animation: progress 3s ease-in-out infinite;
+    }
+    
+    @keyframes progress {
+      0% {
+        width: 20%;
+      }
+      50% {
+        width: 80%;
+      }
+      100% {
+        width: 20%;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .wave-bg {
+        background-size: 200% 100%;
+      }
+      
+      .wave-animation {
+        background-size: 300% 100%;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+  <!-- Mobile Menu Overlay -->
+  <div id="mobileMenu" class="mobile-menu fixed top-0 right-0 h-full w-full md:w-64 bg-white z-50 shadow-2xl p-6 flex flex-col">
+    <div class="flex justify-between items-center mb-8">
+      <div class="text-2xl font-bold">🌊 <span class="gradient-text">TaskWave</span></div>
+      <button id="closeMenu" class="text-gray-500 hover:text-gray-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <nav class="flex flex-col space-y-4">
+      <a href="index.html#features" class="px-4 py-2 text-primary-700 hover:bg-primary-50 rounded-lg transition-colors">Features</a>
+      <a href="index.html#testimonials" class="px-4 py-2 text-primary-700 hover:bg-primary-50 rounded-lg transition-colors">Testimonials</a>
+      <a href="index.html#faq" class="px-4 py-2 text-primary-700 hover:bg-primary-50 rounded-lg transition-colors">FAQ</a>
+      <a href="login.html" class="px-4 py-2 text-primary-700 hover:bg-primary-50 rounded-lg transition-colors">Login</a>
+      <a href="register.html" class="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-center">Register</a>
+    </nav>
+  </div>
+
+  <div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="index.html" class="flex items-center">
+          <div class="text-3xl font-bold">🌊 <span class="gradient-text">TaskWave</span></div>
+        </a>
+        <nav class="hidden md:flex items-center space-x-2">
+          <a href="index.html#features" class="px-4 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">Features</a>
+          <a href="index.html#testimonials" class="px-4 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">Testimonials</a>
+          <a href="index.html#faq" class="px-4 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">FAQ</a>
+          <a href="login.html" class="px-4 py-2 text-primary-700 font-medium hover:text-primary-900 transition-colors">Login</a>
+          <a href="register.html" class="px-5 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">Register</a>
+        </nav>
+        <button id="menuToggle" class="md:hidden text-primary-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <!-- 404 Error Section -->
+    <div class="flex-grow flex flex-col">
+      <div class="wave-bg flex-grow relative">
+        <div class="container mx-auto px-4 py-12 md:py-16 flex flex-col items-center">
+          <div class="number-container mb-6 md:mb-4">
+            <div class="text-8xl md:text-9xl font-bold flex gap-2 md:gap-4 number-animation">
+              <span class="text-primary-600">4</span>
+              <span class="text-primary-500 animate-float">0</span>
+              <span class="text-primary-600">4</span>
+            </div>
+          </div>
+          
+          <h1 class="text-3xl md:text-5xl font-bold mb-4 text-center">
+            Oops! This page has drifted away
+          </h1>
+          
+          <p class="text-lg text-gray-700 mb-6 text-center max-w-2xl">
+            We're sorry, but the page you're looking for can't be found. Our team is actively working on restoring it.
+          </p>
+          
+          <!-- Worker Animation -->
+          <div class="relative w-full max-w-xl h-64 md:h-72 mb-8 bg-white/40 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-primary-100">
+            <!-- Construction Scene -->
+            <div class="relative h-full w-full overflow-hidden flex items-center justify-center">
+              <!-- Progress bar -->
+              <div class="absolute top-4 left-4 right-4 h-6 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-primary-500 to-secondary-500 progress-bar-animation rounded-full flex items-center justify-center">
+                  <span class="text-xs text-white font-medium">Rebuilding page...</span>
+                </div>
+              </div>
+              
+              <!-- Platform with 404 -->
+              <div class="absolute bottom-2 w-full h-12 bg-primary-100 rounded-md">
+                <div class="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-3xl font-bold text-gray-300">404</div>
+              </div>
+              
+              <!-- Worker 1 - Left side -->
+              <div class="worker-animation absolute bottom-14 left-16 md:left-24">
+                <!-- Worker figure -->
+                <div class="relative">
+                  <!-- Head -->
+                  <div class="w-8 h-8 bg-yellow-500 rounded-full relative">
+                    <!-- Face -->
+                    <div class="absolute top-2 left-1.5 w-1.5 h-1.5 bg-gray-800 rounded-full"></div>
+                    <div class="absolute top-2 right-1.5 w-1.5 h-1.5 bg-gray-800 rounded-full"></div>
+                    <div class="absolute top-4 left-2.5 w-3 h-1 bg-gray-800 rounded-full animate-pulse"></div>
+                    <!-- Hard hat -->
+                    <div class="absolute -top-2 -left-1 w-10 h-4 bg-secondary-500 rounded-t-full"></div>
+                  </div>
+                  <!-- Body -->
+                  <div class="w-10 h-12 bg-primary-600 rounded-md relative">
+                    <!-- Arms -->
+                    <div class="absolute top-2 -left-4 w-4 h-2 bg-primary-600 rounded"></div>
+                    <!-- Hammer arm - animated -->
+                    <div class="absolute top-0 -right-8 w-8 h-2 bg-primary-600 rounded hammer-animation">
+                      <!-- Hammer -->
+                      <div class="absolute top-0 right-0 w-4 h-6 bg-gray-700 rounded"></div>
+                    </div>
+                    <!-- Legs -->
+                    <div class="absolute -bottom-4 left-1 w-2 h-4 bg-blue-800 rounded"></div>
+                    <div class="absolute -bottom-4 right-1 w-2 h-4 bg-blue-800 rounded"></div>
+                  </div>
+                </div>
+                
+                <!-- Thought bubble -->
+                <div class="absolute -top-12 left-8">
+                  <div class="bubble bubble-1 w-6 h-6 bg-white rounded-full border border-gray-200 flex items-center justify-center">
+                    <span class="text-xs text-primary-500">?</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Worker 2 - Right side -->
+              <div class="worker-animation absolute bottom-14 right-16 md:right-24" style="animation-delay: 1s;">
+                <!-- Worker figure -->
+                <div class="relative">
+                  <!-- Head -->
+                  <div class="w-8 h-8 bg-orange-300 rounded-full relative">
+                    <!-- Face -->
+                    <div class="absolute top-2 left-1.5 w-1.5 h-1.5 bg-gray-800 rounded-full"></div>
+                    <div class="absolute top-2 right-1.5 w-1.5 h-1.5 bg-gray-800 rounded-full"></div>
+                    <div class="absolute top-4 left-2.5 w-3 h-1 bg-gray-800 rounded-full animate-pulse"></div>
+                    <!-- Hard hat -->
+                    <div class="absolute -top-2 -left-1 w-10 h-4 bg-primary-500 rounded-t-full"></div>
+                  </div>
+                  <!-- Body -->
+                  <div class="w-10 h-12 bg-secondary-600 rounded-md relative">
+                    <!-- Left arm -->
+                    <div class="absolute top-2 -left-4 w-4 h-2 bg-secondary-600 rounded"></div>
+                    <!-- Wrench arm - animated -->
+                    <div class="absolute top-2 -right-8 w-8 h-2 bg-secondary-600 rounded">
+                      <!-- Wrench -->
+                      <div class="absolute -top-1 right-0 wrench-animation">
+                        <div class="w-5 h-2 bg-gray-400 rounded-full"></div>
+                        <div class="absolute top-0 right-4 w-3 h-4 bg-gray-400 rounded-full"></div>
+                      </div>
+                    </div>
+                    <!-- Legs -->
+                    <div class="absolute -bottom-4 left-1 w-2 h-4 bg-gray-700 rounded"></div>
+                    <div class="absolute -bottom-4 right-1 w-2 h-4 bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+                
+                <!-- Thought bubble -->
+                <div class="absolute -top-12 right-8">
+                  <div class="bubble bubble-2 w-6 h-6 bg-white rounded-full border border-gray-200 flex items-center justify-center">
+                    <span class="text-xs text-secondary-500">!</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Floating gear elements -->
+              <div class="absolute top-20 left-1/4 w-12 h-12">
+                <div class="w-12 h-12 border-4 border-gray-300 rounded-full gear-animation relative">
+                  <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-gray-300 rounded-full"></div>
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-gray-300"></div>
+                  <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-gray-300"></div>
+                  <div class="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-gray-300"></div>
+                  <div class="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-gray-300"></div>
+                </div>
+              </div>
+              
+              <div class="absolute top-16 right-1/4 w-8 h-8">
+                <div class="w-8 h-8 border-3 border-gray-400 rounded-full gear-animation relative" style="animation-direction: reverse;">
+                  <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-gray-400 rounded-full"></div>
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-400"></div>
+                  <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-gray-400"></div>
+                  <div class="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-400"></div>
+                  <div class="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-400"></div>
+                </div>
+              </div>
+              
+              <!-- Status message -->
+              <div class="absolute bottom-20 w-full text-center">
+                <span class="px-3 py-1 bg-yellow-100 border border-yellow-300 rounded-full text-sm text-yellow-800 animate-pulse-slow">
+                  <span class="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-1"></span> Maintenance in progress
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="text-center mb-8">
+            <p class="text-primary-700 font-medium">Estimated recovery time: <span class="animate-pulse">Very soon!</span></p>
+          </div>
+          
+          <div class="flex flex-wrap gap-4 justify-center">
+            <a href="index.html" class="btn-primary px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-lg hover:opacity-90 transition-all shadow-lg hover:shadow-xl flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              Back to Home
+            </a>
+            <a href="#" onclick="window.history.back(); return false;" class="px-6 py-3 bg-white text-primary-700 border border-primary-200 rounded-lg hover:bg-gray-50 transition-all flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Go Back
+            </a>
+          </div>
+        </div>
+        
+        <!-- Animated wave at bottom -->
+        <div class="absolute bottom-0 left-0 right-0 h-24 md:h-32 wave-animation"></div>
+      </div>
+      
+      <!-- Suggested pages -->
+      <div class="bg-white py-12">
+        <div class="container mx-auto px-4">
+          <h2 class="text-2xl font-bold text-center mb-8">Looking for something else?</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <a href="index.html#features" class="group p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white hover:border-primary-200">
+              <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mb-4 group-hover:bg-primary-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold mb-2 group-hover:text-primary-600 transition-colors">Explore Features</h3>
+              <p class="text-gray-600">Discover what TaskWave can do for your team's productivity</p>
+            </a>
+            
+            <a href="login.html" class="group p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white hover:border-primary-200">
+              <div class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-100 text-primary-600 mb-4 group-hover:bg-primary-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold mb-2 group-hover:text-primary-600 transition-colors">Login</h3>
+              <p class="text-gray-600">Access your account and continue managing your tasks</p>
+            </a>
+            
+            <a href="register.html" class="group p-6 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-white hover:border-primary-200">
+              <div class="w-12 h-12 flex items-center justify-center rounded-full bg-secondary-100 text-secondary-600 mb-4 group-hover:bg-secondary-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold mb-2 group-hover:text-secondary-600 transition-colors">Register</h3>
+              <p class="text-gray-600">Create a new account and start your productivity journey</p>
+            </a>
+          </div>
+        </div>
+    </div>
+      
+    <!-- Report problem section -->
+    <div class="bg-gray-50 py-10 border-t border-gray-100">
+      <div class="container mx-auto px-4">
+        <div class="max-w-2xl mx-auto rounded-xl bg-white shadow-md p-6 border border-gray-100">
+          <h3 class="text-xl font-semibold mb-4 text-center">Found a problem?</h3>
+          
+          <div class="flex flex-col md:flex-row gap-4 items-center">
+            <div class="flex-grow">
+              <p class="text-gray-600 mb-2">If you believe this page should exist, let us know and we'll fix it as soon as possible.</p>
+              <div class="text-sm text-gray-500">
+                <div class="flex items-center mb-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Our team will be notified</span>
+                </div>
+                <div class="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Typical response time: 1-2 business days</span>
+                </div>
+              </div>
+            </div>
+            
+            <button class="btn-primary px-5 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:opacity-90 transition-all shadow hover:shadow-md flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Report Issue
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Recent updates -->
+    <div class="bg-white py-10 border-t border-gray-100">
+      <div class="container mx-auto px-4">
+        <h2 class="text-2xl font-bold text-center mb-8">Recent Updates</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div class="bg-primary-50 rounded-xl p-6 border border-primary-100 hover:shadow-md transition-shadow">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-medium">New Feature: Project Templates</h3>
+            </div>
+            <p class="text-gray-600">We've added customizable project templates to help you kickstart your projects faster and with better organization.</p>
+            <div class="mt-4 text-sm text-primary-700">April 20, 2025</div>
+          </div>
+          
+          <div class="bg-secondary-50 rounded-xl p-6 border border-secondary-100 hover:shadow-md transition-shadow">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 bg-secondary-100 rounded-full flex items-center justify-center text-secondary-600 mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-medium">Enhanced Security Features</h3>
+            </div>
+            <p class="text-gray-600">We've strengthened our security measures with two-factor authentication and advanced encryption for all your data.</p>
+            <div class="mt-4 text-sm text-secondary-700">April 15, 2025</div>
+          </div>
+        </div>
+        
+        <div class="text-center mt-8">
+          <a href="index.html#updates" class="inline-flex items-center text-primary-600 hover:text-primary-800 font-medium">
+            View all updates
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-8">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <div class="text-2xl font-bold text-white">🌊 <span class="gradient-text">TaskWave</span></div>
+          <p class="mt-1">Simple, powerful task management</p>
+        </div>
+        
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="index.html" class="hover:text-white transition-colors">Home</a>
+          <a href="index.html#features" class="hover:text-white transition-colors">Features</a>
+          <a href="index.html#testimonials" class="hover:text-white transition-colors">Testimonials</a>
+          <a href="index.html#faq" class="hover:text-white transition-colors">FAQ</a>
+          <a href="contact.html" class="hover:text-white transition-colors">Contact</a>
+        </div>
+        
+        <div class="flex gap-4 mt-4 md:mt-0">
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+            </svg>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 mt-6 pt-6">
+        <div class="flex flex-col md:flex-row justify-between items-center text-sm">
+          <div class="mb-4 md:mb-0">&copy; 2025 TaskWave. All rights reserved.</div>
+          <div class="flex gap-4">
+            <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" class="hover:text-white transition-colors">Cookie Policy</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- JavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('menuToggle');
+    const closeMenu = document.getElementById('closeMenu');
+    const mobileMenu = document.getElementById('mobileMenu');
+    
+    if (menuToggle && closeMenu && mobileMenu) {
+      menuToggle.addEventListener('click', function() {
+        mobileMenu.classList.add('active');
+      });
+      
+      closeMenu.addEventListener('click', function() {
+        mobileMenu.classList.remove('active');
+      });
+    }
+    
+    // Auto-hide mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+      if (mobileMenu && mobileMenu.classList.contains('active') && 
+          !mobileMenu.contains(event.target) && 
+          event.target !== menuToggle) {
+        mobileMenu.classList.remove('active');
+      }
+    });
+    
+    // Add page loading effect
+    const body = document.querySelector('body');
+    if (body) {
+      body.style.opacity = '0';
+      setTimeout(() => {
+        body.style.transition = 'opacity 0.5s ease';
+        body.style.opacity = '1';
+      }, 100);
+    }
+    
+    // Animated counter for page restoration
+    let timeEstimate = 60; // seconds
+    const updateCounter = () => {
+      if (timeEstimate > 0) {
+        timeEstimate--;
+        // Here you could update a counter if you wanted to show an actual countdown
+      }
+    };
+    
+    // Run counter
+    setInterval(updateCounter, 1000);
+    
+    // Report button click animation
+    const reportBtn = document.querySelector('.btn-primary');
+    if (reportBtn) {
+      reportBtn.addEventListener('click', function() {
+        this.classList.add('animate-pulse');
+        setTimeout(() => {
+          this.classList.remove('animate-pulse');
+          alert('Thank you for reporting this issue! Our team has been notified.');
+        }, 500);
+      });
+    }
+  });
+</script>
+</body>
+</html>
